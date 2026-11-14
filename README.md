@@ -36,6 +36,47 @@ The SoC routes memory and data requests using a hardcoded address decoding schem
 
 Dive into the source code to see exactly how these components and connections are built under the hood!
 
+## Proyecto 4: testbench del curso
+
+`tb/tb_proyecto_4.sv` emula a la FPGA maestra: envía la serie `tb/practica.csv` por
+SPI, lee el byte `DECISION` y lleva la contabilidad. Ambos archivos son **copias
+exactas de los entregados por el curso y no se editan**.
+
+```bash
+make tb_p4                         # ronda 3 (T = 0,1 ms), 2000 ticks, sw/trade.hex
+make tb_p4 RONDA=1 NTICKS=50       # ronda 1 (10 ms) o 2 (1 ms), otro largo
+make tb_p4 PROG=sw/echo.hex        # otro programa (se ensambla su .s con sw/assembler.py)
+make tb_p4 NTICKS=20000            # serie completa (~40 min en ronda 3)
+```
+
+El target genera `sim/build/tb_proyecto_4.sv`, una copia del original donde solo
+cambian los valores del bloque *"Configuración: pueden cambiar estos valores"*
+(`PROGRAMA`, `PERIODO_NS`, `NTICKS`), y lo corre desde la raíz del repo. El detalle por
+tick queda en `decisiones.csv`. Referencia: 2000 ticks de la ronda 3 tardan ~4 min.
+
+**Requiere Icarus Verilog ≥ 13.** Con Icarus 12, el paquete de Ubuntu, el testbench no
+compila (`$fgets's first argument must be a reg`), porque esa versión no acepta un
+`string` como argumento de `$fgets`. El Makefile revisa la versión y avisa. Opciones:
+
+* **Con LibreLane instalado (Proyecto 3)**: su `nix-shell` trae Icarus 13.0 (devel,
+  snapshot `s20250103`):
+
+  ```bash
+  nix-shell ~/librelane/shell.nix --run "make tb_p4"
+  ```
+
+* **Sin LibreLane**: compilar Icarus desde el código fuente (instala en `~/.local`,
+  no toca el del sistema):
+
+  ```bash
+  sudo apt install build-essential autoconf gperf flex bison
+  git clone https://github.com/steveicarus/iverilog.git ~/iverilog && cd ~/iverilog
+  sh autoconf.sh && ./configure --prefix=$HOME/.local && make -j$(nproc) && make install
+  ~/.local/bin/iverilog -V | head -1          # debe decir version 13.x
+  ```
+
+  y luego, desde el repo: `make tb_p4 IVERILOG=~/.local/bin/iverilog VVP=~/.local/bin/vvp`.
+
 ## How to Build
 
 To synthesize and program the reflex game onto the Go Board, you will need the open-source FPGA toolchain.

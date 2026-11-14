@@ -20,3 +20,7 @@ module_stats/
 sim/sim
 *.vcd
 *.csv
+# Proyecto 4: la serie de practica se versiona (el testbench la lee);
+# las salidas de simulacion no
+!tb/practica.csv
+sim/build/
