@@ -88,18 +88,18 @@ To synthesize and program the reflex game onto the Go Board, you will need the o
 make all
 ```
 
-`TOP` defaults to `game_top` (`rtl/game_top.v`, the reflex game), so `make all` alone builds and programs the game. The Makefile also exposes the individual steps if you only need one of them:
+**Proyecto 4:** `TOP` defaults to `trade_top` (`rtl/trade_top.v`, the trading agent, boots `sw/trade.hex`), so `make all` alone builds and programs the trader. The Makefile also exposes the individual steps if you only need one of them:
 
 ```bash
-make game_top.json   # synthesis only (yosys)
-make game_top.asc    # + place & route (nextpnr-ice40)
-make game_top.bin    # + pack the bitstream (icepack)
-make prog             # (re-)flash an already-built game_top.bin (iceprog)
-make clean             # remove build/synthesis artifacts
-make TOP=pochoco_soc all   # build the bare SoC instead (e.g. to run blink.s/7seg.s)
+make trade_top.json        # synthesis only (yosys)
+make trade_top.asc         # + place & route (nextpnr-ice40, timing checked at FREQ=25 MHz)
+make trade_top.bin         # + pack the bitstream (icepack)
+make prog                  # (re-)flash an already-built trade_top.bin (iceprog)
+make clean                 # remove build/synthesis artifacts
+make FREQ=36 all           # check timing at another clock (e.g. with the PLL)
 ```
 
-`make all` (and `make prog`) always program **whatever is currently in `game_top.bin`** — if you changed `sw/game.s`, regenerate `sw/game.hex` first (see below) and then rerun `make clean && make all`, since `sw/game.hex` is baked into the bitstream via `$readmemh` at synthesis time and a stale bitstream will not pick up a newer `.hex` on its own.
+The program image is a dependency of the synthesis step: `make` re-assembles `sw/trade.hex` from `sw/trade.s` with `sw/assembler.py` and re-synthesizes whenever it changes, since the `.hex` is baked into the bitstream via `$readmemh`. If `sw/trade.s` does not exist yet, the build stops with `No rule to make target 'sw/trade.hex'`.
 
 ### Flashing from WSL
 

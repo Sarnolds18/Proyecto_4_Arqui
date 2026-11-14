@@ -9,11 +9,15 @@
 # - Nicolás Villegas <navillegas@miuandes.cl>
 
 # Configuration
-# TOP defaults to game_top (the FPGA top-level for the reflex game, see
-# rtl/game_top.v). Override on the command line to build a different module,
+# TOP defaults to trade_top (Proyecto 4, the trading agent, see
+# rtl/trade_top.v). Override on the command line to build a different module,
 # e.g. `make TOP=pochoco_soc` to build the bare SoC instead.
-TOP  ?= game_top
+TOP  ?= trade_top
 PCF  := goboard.pcf
+# Clock frequency (MHz) nextpnr checks timing against. The Go Board oscillator
+# is 25 MHz; without --freq nextpnr only checks its 12 MHz default. Raise it
+# if the clock is multiplied with the PLL.
+FREQ ?= 25
 
 # RTL Sources
 SRC  := $(wildcard ./rtl/*.v ./rtl/**/*.v)
@@ -28,13 +32,18 @@ BIN  := $(TOP).bin
 # Default target
 all: prog
 
+# Program image baked into the top via $readmemh. Listing it as a
+# dependency re-assembles it from its .s (rule sw/%.hex below) and forces a
+# re-synthesis when it changes, so the bitstream never boots a stale image.
+HEX_trade_top := sw/trade.hex
+
 # Step 1: Synthesis using Yosys
-$(JSON): $(SRC)
+$(JSON): $(SRC) $(HEX_$(TOP))
 	yosys -p "read_verilog $(SRC); synth_ice40 -top $(TOP) -json ${TOP}.json; stat"
 
 # Step 2: Place and Route using NextPNR
 $(ASC): $(JSON) $(PCF)
-	nextpnr-ice40 --hx1k --package vq100 --json $(JSON) --pcf $(PCF) --asc $(ASC)
+	nextpnr-ice40 --hx1k --package vq100 --freq $(FREQ) --json $(JSON) --pcf $(PCF) --asc $(ASC)
 
 # Step 3: Bitstream Generation
 $(BIN): $(ASC)
