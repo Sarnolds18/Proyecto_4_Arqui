@@ -84,6 +84,26 @@ compila (`$fgets's first argument must be a reg`), porque esa versión no acepta
 
   y luego, desde el repo: `make tb_p4 IVERILOG=~/.local/bin/iverilog VVP=~/.local/bin/vvp`.
 
+## Proyecto 4: referencia en Python
+
+`ref/trader.py` reproduce la maestra del testbench (mismo protocolo, misma contabilidad y
+mismas referencias) y define las estrategias en aritmética entera exacta, para que
+`sw/trade.s` tome **exactamente las mismas decisiones**. Solo usa la biblioteca estándar.
+
+```bash
+python3 ref/trader.py                          # estrategia v0, 2000 ticks, ronda 3
+python3 ref/trader.py -e v0 -n 20000 -u 3      # serie completa, otro umbral
+python3 ref/trader.py -e echo                  # DECISION = precio (prueba de protocolo)
+make tb_p4 && python3 ref/trader.py --compara decisiones.csv   # trade.s vs referencia
+```
+
+Para `--compara`, usar la misma ronda (`-r`) y el mismo número de ticks (`-n`) que en
+`make tb_p4`. Detalle del testbench que la referencia modela: el reset de encendido de
+`pochoco_soc` dura 2^12 ciclos (163,84 µs) y también resetea al esclavo SPI, así que
+los primeros precios llegan antes de que el programa arranque y se pierden (2 en la
+ronda 3, 1 en las rondas 1 y 2). En la placa real no pasa, porque la Go Board ya está
+configurada cuando parte la maestra.
+
 ## How to Build
 
 To synthesize and program the trader onto the Go Board, you will need the open-source FPGA toolchain.
