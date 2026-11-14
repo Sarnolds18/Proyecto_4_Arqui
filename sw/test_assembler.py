@@ -169,23 +169,45 @@ class TestLabelsAndBranches(unittest.TestCase):
         self.assertEqual(imm_j, -8)
 
 
-class TestGameRegression(unittest.TestCase):
-    """Assembling the real game program must reproduce the committed hex
-    exactly -- this is the check used before every FPGA demo/regen."""
+HERE = os.path.dirname(os.path.abspath(__file__))
 
-    def test_game_s_matches_committed_game_hex(self):
-        here = os.path.dirname(os.path.abspath(__file__))
-        src_path = os.path.join(here, "game.s")
-        hex_path = os.path.join(here, "game.hex")
 
-        code = asm.drop_comments(asm.code_to_list(asm.read_file(src_path)))
-        words = asm.assemble(code)
-        produced = asm.to_hex(words)
+def assemble_file(name):
+    code = asm.drop_comments(asm.code_to_list(asm.read_file(os.path.join(HERE, name))))
+    return asm.to_hex(asm.assemble(code))
 
+
+class TestReferencePrograms(unittest.TestCase):
+    """blink.hex, 7seg.hex and buttons_leds.hex come from the base repo and
+    were built with the GNU RISC-V toolchain (sw/Makefile), so they are an
+    oracle independent of assembler.py: our output must match byte for byte."""
+
+    def check(self, name):
+        with open(os.path.join(HERE, name + ".hex")) as f:
+            committed = f.read()
+        self.assertEqual(assemble_file(name + ".s"), committed)
+
+    def test_blink_matches_gnu_toolchain(self):
+        self.check("blink")
+
+    def test_7seg_matches_gnu_toolchain(self):
+        self.check("7seg")
+
+    def test_buttons_leds_matches_gnu_toolchain(self):
+        self.check("buttons_leds")
+
+
+class TestTradeHexInSync(unittest.TestCase):
+    """The committed trade.hex must be what assembler.py produces from
+    trade.s (catches a .s edited without regenerating the .hex)."""
+
+    def test_trade_s_matches_committed_trade_hex(self):
+        hex_path = os.path.join(HERE, "trade.hex")
+        if not os.path.exists(os.path.join(HERE, "trade.s")) or not os.path.exists(hex_path):
+            self.skipTest("sw/trade.s / sw/trade.hex todavia no existen")
         with open(hex_path) as f:
             committed = f.read()
-
-        self.assertEqual(produced, committed)
+        self.assertEqual(assemble_file("trade.s"), committed)
 
 
 if __name__ == "__main__":

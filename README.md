@@ -1,5 +1,12 @@
 # Pochoco SoC & Espino Core
 
+> **Proyecto 4 — Pochoco Trader** (Arquitectura de Computadores, Uniandes, 2026-2):
+> agente de inversión que recibe un precio por SPI en cada tick y responde comprar,
+> vender o mantener, corriendo en Espino sobre la Go Board. Este repo parte de la
+> entrega del Proyecto 2 (commit `bb042a1`). El juego de reflejos del Proyecto 2 ya no
+> está aquí: sigue en [`Sarnolds18/Proyecto_2_Arqui`](https://github.com/Sarnolds18/Proyecto_2_Arqui),
+> rama `proyecto2` (tag `p2-entrega`), y en el historial de este repo hasta `bb042a1`.
+
 > Meet Pochoco SoC and Espino Core. Inspired by the native flora of the Pochoco trails, it is an entry-level, highly efficient architecture designed to flourish in resource-constrained environments.
 
 ![Pochoco SoC Architecture](pochoco_soc.svg)
@@ -79,7 +86,7 @@ compila (`$fgets's first argument must be a reg`), porque esa versión no acepta
 
 ## How to Build
 
-To synthesize and program the reflex game onto the Go Board, you will need the open-source FPGA toolchain.
+To synthesize and program the trader onto the Go Board, you will need the open-source FPGA toolchain.
 
 1. Install the tools by following the instructions at the [oss-cad-suite-build repository](https://github.com/yosyshq/oss-cad-suite-build).
 2. Once installed, ~~blindly copy-paste~~ (we strongly encourage reading the Makefile first to make sure we aren't deleting your home directory) the following command in the project root to synthesize, place & route, pack and flash the bitstream:
@@ -111,7 +118,7 @@ usbipd bind --busid <X-Y>          # first time only
 usbipd attach --wsl --busid <X-Y>  # again after every unplug
 ```
 
-If `iceprog` then reports `Can't find iCE FTDI USB device` even though `lsusb` lists `0403:6010`, your user lacks write access to the USB device. Either flash with `sudo ~/oss-cad-suite/bin/iceprog game_top.bin`, or add a udev rule once:
+If `iceprog` then reports `Can't find iCE FTDI USB device` even though `lsusb` lists `0403:6010`, your user lacks write access to the USB device. Either flash with `sudo ~/oss-cad-suite/bin/iceprog trade_top.bin`, or add a udev rule once:
 
 ```bash
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6010", MODE="0666"' | sudo tee /etc/udev/rules.d/53-goboard.rules
@@ -119,20 +126,6 @@ sudo service udev restart          # then replug + usbipd attach again
 ```
 
 `iceprog` may print `flash ID: 0xFF 0xFF 0xFF 0xFF` under usbipd; as long as it ends with `VERIFY OK`, the board was programmed correctly.
-
-## Playing the Game
-
-The board boots straight into the game after programming (and on every power-up, since the bitstream lives in the board's flash).
-
-1. All 4 LEDs light up for 3 seconds.
-2. Then only one LED (chosen pseudo-randomly) stays on. **The reaction timer starts at this moment**, when the 4 LEDs go off; the 3-second wait is not counted.
-3. Press the button that matches that LED (switch SW*i* ↔ LED D*i*, as printed on the board).
-   * **Correct:** your reaction time is shown for 2 seconds on the 7-segment displays, in tenths of a second (`04` = 0.4 s, truncated), and the next round starts.
-   * **Wrong button:** the displays show `EE` for about 0.5 s and the same round restarts; rounds already won are kept.
-4. After 10 correct rounds the average reaction time (same unit) stays on the displays.
-5. Press any button to start a new game. Unplugging and replugging the board also restarts it.
-
-A button still held down from the previous round is ignored until it is released. Times above 9.9 s are clipped to `99`.
 
 ### Power-on reset
 
@@ -142,37 +135,31 @@ A button still held down from the previous round is ignored until it is released
 
 The `sw/` folder holds RV32E assembly programs for the Espino Core. There are two separate toolchains in play here, used for two different purposes — do not mix them up:
 
-* **`sw/game.s` → `sw/game.hex` (the actual deliverable) — assembled with our own assembler, `sw/assembler.py`.** This is a from-scratch RV32E assembler written in plain Python 3 (standard library only, no dependencies) that does **not** invoke any external RISC-V assembler at any point, as the project requires.
-* **`blink.s`, `7seg.s`, `buttons_leds.s` (earlier example/scratch programs, kept for reference) — assembled with a real RISC-V toolchain via `sw/Makefile`**, as described below. `sw/Makefile`'s generic `%.hex: %.s` rule shells out to `riscv64-unknown-elf-{as,ld,objcopy}`, so **never run `make game` (or any target matching `game.*`) inside `sw/`** — it would (re)assemble `game.hex` with that external toolchain instead of `assembler.py`, which is exactly what the project forbids for the game. Always regenerate `sw/game.hex` with the explicit command below instead.
+* **`sw/trade.s` → `sw/trade.hex` (the Proyecto 4 program) — assembled with our own assembler, `sw/assembler.py`.** This is a from-scratch RV32E assembler written in plain Python 3 (standard library only, no dependencies) that does **not** invoke any external RISC-V assembler at any point.
+* **`blink.s`, `7seg.s`, `buttons_leds.s` (example programs from the base repo, kept for reference) — assembled with a real RISC-V toolchain via `sw/Makefile`**, as described below. `sw/Makefile`'s generic `%.hex: %.s` rule shells out to `riscv64-unknown-elf-{as,ld,objcopy}`, so **never run `make trade` (or any target matching `trade.*`) inside `sw/`** — it would (re)assemble `trade.hex` with that external toolchain instead of `assembler.py`. Use the root Makefile or the explicit command below instead.
 
-### Regenerating `sw/game.hex` from `sw/game.s`
+### Regenerating `sw/trade.hex` from `sw/trade.s`
 
-```bash
-cd sw
-python3 assembler.py game.s game.hex
-```
-
-No install step and no RISC-V toolchain needed — `assembler.py` only needs a Python 3 interpreter. It prints nothing on a clean assembly; warnings (e.g. a shift instruction, which this core executes as `ADD`, see the CATCH below) go to stderr, and any syntax/encoding error is reported compiler-style (file:line:column, with the offending source line underlined) and aborts without writing `game.hex`.
-
-After regenerating `game.hex`, re-synthesize and reflash so the new image is actually loaded onto the FPGA:
+From the repo root, `make sw/trade.hex` (the bitstream and `make tb_p4` targets already do it on their own), or by hand:
 
 ```bash
-cd ..
-make clean && make all
+python3 sw/assembler.py sw/trade.s sw/trade.hex
 ```
 
-To check the assembler itself (23 unit + regression tests, pure `unittest`, no external RISC-V assembler involved):
+No install step and no RISC-V toolchain needed — `assembler.py` only needs a Python 3 interpreter. It prints nothing on a clean assembly; warnings (e.g. a shift instruction, which this core executes as `ADD`, see the CATCH below) go to stderr, and any syntax/encoding error is reported compiler-style (file:line:column, with the offending source line underlined) and aborts without writing the `.hex`.
+
+To check the assembler itself (pure `unittest`, no external RISC-V assembler involved):
 
 ```bash
 cd sw
 python3 -m unittest test_assembler.py -v
 ```
 
-One of those tests re-assembles `game.s` and diffs the result byte-for-byte against the committed `game.hex`, so it also doubles as a "is `game.hex` in sync with `game.s`?" check — run it after editing `game.s` and before rebuilding the bitstream.
+Besides the unit tests, `TestReferencePrograms` re-assembles `blink.s`, `7seg.s` and `buttons_leds.s` and compares them byte for byte with the `.hex` files of the base repo, which were built with the GNU RISC-V toolchain — an oracle independent of `assembler.py`. `TestTradeHexInSync` checks that a committed `sw/trade.hex` matches `sw/trade.s` (skipped while they don't exist).
 
 ### The other example programs (`blink.s`, `7seg.s`, `buttons_leds.s`)
 
-These predate the reflex game and are kept only as earlier reference/scratch programs; they are **not** part of the graded deliverable and are still assembled with a real RISC-V toolchain, via `sw/Makefile`.
+These come from the base repo and are kept only as reference programs; they are **not** part of the deliverable and are still assembled with a real RISC-V toolchain, via `sw/Makefile`.
 
 You'll need a RISC-V toolchain on your `PATH` (`riscv64-unknown-elf-{as,ld,objcopy}` on Debian/Ubuntu/WSL via `sudo apt install gcc-riscv64-unknown-elf`, or `brew install riscv64-unknown-elf-gcc` on macOS). If your toolchain uses a different prefix, override it on the command line rather than editing the Makefile:
 
@@ -182,6 +169,6 @@ make blink                        # assembles blink.s -> blink.hex
 make PREFIX=riscv64-elf- blink    # if your toolchain uses a different prefix
 ```
 
-Drop a new `<name>.s` file in `sw/` and `make <name>` picks it up automatically, no `Makefile` changes needed (except for `game.s`, see above). Don't forget to change the MemFile in `pochoco_soc.v`/`game_top.v` if you want to boot a different image.
+Drop a new `<name>.s` file in `sw/` and `make <name>` picks it up automatically, no `Makefile` changes needed (except for `trade.s`, see above). Don't forget to change the MemFile in `trade_top.v` if you want to boot a different image.
 
 **CATCH:** The core implements [RV32E](https://docs.riscv.org/reference/isa/v20260120/unpriv/rv32.html), with one thing worth knowing: shift instructions (`SLL`/`SRL`/`SRA`/`SLLI`/`SRLI`/`SRAI`) are decoded correctly but disabled in the ALU to save LUTs on the target FPGA, so they currently execute as `ADD` instead. Avoid shifts in your assembly, or design your own shifter...

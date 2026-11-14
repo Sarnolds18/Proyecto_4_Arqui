@@ -9,8 +9,7 @@
 // trade_top: FPGA top-level for the trading agent. It wires the Go Board
 // pins (goboard.pcf) straight into pochoco_soc, which boots sw/trade.hex.
 // The price arrives and the decision leaves through the SPI slave (PMOD
-// pins); the algorithm lives in sw/trade.s. game_top (Proyecto 2) is kept
-// unchanged and can still be built with `make TOP=game_top`.
+// pins); the algorithm lives in sw/trade.s.
 
 module trade_top (
   input  wire       i_Clk,
