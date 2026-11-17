@@ -55,7 +55,15 @@ prog: $(BIN)
 
 # Clean up generated files
 clean:
-	rm -f $(JSON) $(ASC) $(BIN)
+	rm -f $(JSON) $(ASC) $(BIN) echo.json echo.asc echo.bin
+
+# echo.bin: SoC con sw/echo.hex (kit de la prueba con la maestra). Usa
+# pochoco_soc como top (mismos puertos que trade_top) cambiando MemFile,
+# asi rtl/ no cambia. Flashear con: iceprog echo.bin
+echo.bin: $(SRC) sw/echo.hex $(PCF)
+	yosys -p "read_verilog $(SRC); chparam -set MemFile \"sw/echo.hex\" pochoco_soc; synth_ice40 -top pochoco_soc -json echo.json; stat"
+	nextpnr-ice40 --hx1k --package vq100 --freq $(FREQ) --json echo.json --pcf $(PCF) --asc echo.asc
+	icepack echo.asc echo.bin
 # ---------------------------------------------------------------------------
 # Proyecto 4: testbench del curso que emula a la FPGA maestra.
 #
