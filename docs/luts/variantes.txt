@@ -1,0 +1,14 @@
+# Yosys 0.69+276 (git sha1 e83399dcf, Release, Clang /usr/bin/clang++ 21.1.8)
+# "nextpnr-ice40" -- Next Generation Place and Route (Version nextpnr-0.11.1-59-g837d0eed)
+# commit 1982fe6, programa sw/blink.hex, nextpnr --hx1k --package vq100 --freq 25 --seed 1
+variante                                           LC    BRAM   LUT4  CARRY    FF   fmax_MHz
+base                                        1275/1280   12/16   1068    208   354      44.81
+sin_debouncer                               1237/1280   12/16   1040    192   327      44.81
+sin_contador                                1111/1280   12/16    930    178   294      41.89
+sin_7seg                                    1244/1280   12/16   1045    208   346      43.88
+sin_leds                                    1251/1280   12/16   1048    208   350      42.34
+sin_periph                                  1055/1280   12/16    897    162   251      43.51
+ram_no_rw_check                             1054/1280   12/16    952    208   237      46.26
+sin_periph_y_no_rw_check                     876/1280   12/16    798    162   134      47.43
+sin_debouncer_ni_contador                   1079/1280   12/16    909    162   263      42.92
+sin_debouncer_ni_contador_y_no_rw_check      908/1280   12/16    817    162   146      48.74
