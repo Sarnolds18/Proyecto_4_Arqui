@@ -1,0 +1,38 @@
+# Generado por ref/resumen_algoritmo.py
+
+## 1. Serie de practica Meta completa (20.000 ticks, sin precios en reset = placa real)
+
+| Estrategia | Patrimonio final | Ordenes | Comisiones | Perdida maxima |
+|---|---:|---:|---:|---:|
+| V2 (final) | 17095 | 5 | 25 | 3215 |
+| V1 | 14577 | 178 | 890 | 6455 |
+| V0 (kit) | 9269 | 297 | 1485 | 7580 |
+| No operar | 10000 | 0 | 0 | 0 |
+| Comprar y mantener | 9695 | 1 | 5 | 9300 |
+
+## 2. Las 8 series reales (Meta y la anterior con espejo, reversa y ambas)
+
+| Serie | Comprar y mantener | V2 | ordenes V2 | perdida max V2 | V1 | V0 |
+|---|---:|---:|---:|---:|---:|---:|
+| meta | 9695 | 17095 | 5 | 3215 | 14577 | 9269 |
+| meta_espejo | 10255 | 18095 | 5 | 2045 | 12413 | 8762 |
+| meta_reversa | 10305 | 17695 | 5 | 2040 | 15431 | 14608 |
+| meta_ambas | 9740 | 17735 | 5 | 3565 | 12855 | 13439 |
+| vieja | 6497 | 9580 | 4 | 6325 | 16928 | 14921 |
+| vieja_espejo | 14765 | 15415 | 5 | 6365 | 22860 | 17761 |
+| vieja_reversa | 15348 | 18480 | 8 | 7010 | 17710 | 19295 |
+| vieja_ambas | 6815 | 10420 | 4 | 4765 | 13087 | 16181 |
+
+## 3. Exceso sobre comprar y mantener por conjunto (W - W_bh)
+
+| Conjunto | Estrategia | Mediana | Media | Peor | Mejor | Gana a comprar y mantener | Ordenes (media) |
+|---|---|---:|---:|---:|---:|---:|---:|
+| ajuste (sint00-23) | V2 | 2687 | 2746 | -4419 | 6712 | 20/24 | 4 |
+| ajuste (sint00-23) | V1 | -2730 | -2598 | -9909 | 3864 | 7/24 | 177 |
+| ajuste (sint00-23) | V0 | -3230 | -3617 | -11103 | 4851 | 3/24 | 315 |
+| prueba (sint24-47) | V2 | 4016 | 3001 | -4645 | 7435 | 19/24 | 4 |
+| prueba (sint24-47) | V1 | -1220 | -2178 | -11395 | 4202 | 9/24 | 165 |
+| prueba (sint24-47) | V0 | -1982 | -3558 | -16408 | 2290 | 8/24 | 330 |
+| reales (8) | V2 | 5498 | 5137 | 650 | 7995 | 8/8 | 5 |
+| reales (8) | V1 | 5004 | 5305 | 2158 | 10431 | 8/8 | 204 |
+| reales (8) | V0 | 3823 | 3852 | -1493 | 9366 | 6/8 | 328 |

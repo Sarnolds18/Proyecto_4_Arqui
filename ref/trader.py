@@ -17,14 +17,14 @@ Reproduce en Python lo que hace tb/tb_proyecto_4.sv (la FPGA maestra):
     real no pasa: la Go Board ya esta configurada cuando parte la maestra.
 
 Ademas define las estrategias en aritmetica entera exacta, para que trade.s
-tome exactamente las mismas decisiones (ver la estrategia "v0").
+tome exactamente las mismas decisiones (estrategias "v0", "v1" y "v2").
 
 Uso (desde la raiz del repo):
-  python3 ref/trader.py                              v0, 2000 ticks
-  python3 ref/trader.py -e v0 -n 20000               serie completa
-  python3 ref/trader.py -e v0 --compara decisiones.csv   (misma RONDA que el tb)
+  python3 ref/trader.py                              v2 (final), 2000 ticks, serie Meta
+  python3 ref/trader.py -n 20000                     serie completa
+  python3 ref/trader.py --compara decisiones.csv     (misma RONDA, -n y serie que el tb)
   python3 ref/trader.py -e v0 -r 1 -n 50 --compara decisiones.csv
-  python3 ref/trader.py -e v0 --csv sim/build/ref_v0.csv
+  python3 ref/trader.py --csv sim/build/ref_v1.csv
 """
 
 import argparse
@@ -165,7 +165,117 @@ class V0:
         return MANTENER
 
 
-ESTRATEGIAS = {"mantener": Mantener, "echo": Echo, "v0": V0}
+class V1:
+    """Version final (S3): reversion a la media sobre la media movil de los
+    ultimos N = 16 precios, umbral U = 3, hasta 2 lotes de 63 acciones.
+    Elegida con ref/explora.py (ver docs/informe/4_1_algoritmo.md). Solo
+    sumas, restas y comparaciones, igual que V0:
+
+      estado: buf[16], suma, llenos (0..16), idx (0..15),
+              lotes (0..2, ordenes de compra sin deshacer)
+
+      por cada precio p:
+        ventana movil igual que V0 (MANTENER mientras llenos < 16)
+        x = 16 * p                          # 4 sumas
+        si lotes < 2 y x + 16*U < suma:     # p < media - U
+            decision = COMPRAR | 63; lotes += 1
+        si no, si lotes > 0 y x > suma + 16*U:   # p > media + U
+            decision = VENDER | 63; lotes -= 1
+        si no:
+            decision = MANTENER
+
+    Cantidad q: siempre 63, el maximo del campo. Con caja de 10.000 y
+    precios de 100 a 255, la primera compra ya invierte entre el 63 % y el
+    100 % de la caja y la segunda completa lo que alcance (la maestra recorta
+    a la caja). Vender 63 dos veces deshace hasta 126 acciones, mas que el
+    maximo comprable (10.000 / 100 = 100), asi que dos ventas dejan en caja.
+    Si una orden se recorta a 0 (sin caja o sin acciones) la maestra no la
+    ejecuta ni cobra comision, pero el contador de lotes avanza igual.
+    """
+    N = 16
+    LOTES = 2
+
+    def __init__(self, umbral=3):
+        self.U = umbral
+        self.buf = [0] * self.N
+        self.suma = 0
+        self.llenos = 0
+        self.idx = 0
+        self.lotes = 0
+
+    def decidir(self, p):
+        if self.llenos < self.N:
+            self.buf[self.llenos] = p
+            self.suma += p
+            self.llenos += 1
+            if self.llenos < self.N:
+                return MANTENER
+        else:
+            self.suma += p - self.buf[self.idx]
+            self.buf[self.idx] = p
+            self.idx = (self.idx + 1) & (self.N - 1)
+        x = self.N * p
+        banda = self.N * self.U
+        if self.lotes < self.LOTES and x + banda < self.suma:
+            self.lotes += 1
+            return COMPRAR | 63
+        if self.lotes > 0 and x > self.suma + banda:
+            self.lotes -= 1
+            return VENDER | 63
+        return MANTENER
+
+
+class V2:
+    """Version final (C3): exposicion por nivel de precio, cuadratica en el
+    rango de la normalizacion del curso (100..255), ordenes de q = 40.
+    Elegida con ref/banco.py (ver docs/informe/4_1_algoritmo.md).
+
+    Idea: cada ronda se normaliza a 100..255, asi que cerca de 100 el precio
+    casi no puede bajar mas y cerca de 255 casi no puede subir. La fraccion
+    del patrimonio en acciones apunta a (r/D)^2, con r = 255 - p y D = 155:
+    100 % en p = 100, 25 % en p = 177, 0 % en p = 255.
+
+      estado: caja, acc (copia exacta: las ordenes nunca se recortan), pend
+
+      por cada precio p:
+        aplicar pend al precio p:  comprar q: caja -= q*p + 5, acc += q
+                                   vender q:  caja += q*p - 5, acc -= q
+        r = clamp(255 - p, 0, 155);  V = acc*p;  W = caja + V;  qp = q*p
+        si caja >= qp + 5 y r*r*W >= 155*155*(V + qp):  COMPRAR | q
+        si no, si acc >= q y r*r*W <= 155*155*(V - qp): VENDER  | q
+        si no: MANTENER
+
+    Solo sumas, restas, comparaciones sin signo y multiplicaciones (bucle de
+    sumas y dobleces en Espino). Todos los productos son < 2^31 mientras
+    W < 89.000. Cantidad q: 40 acciones, fija (ver el informe 4.1).
+    """
+    A, B, Q = 100, 255, 40
+
+    def __init__(self, umbral=None):
+        self.D = self.B - self.A
+        self.caja, self.acc, self.pend = CAJA0, 0, MANTENER
+
+    def decidir(self, p):
+        a, q = self.pend >> 6, self.pend & 63
+        if a == 1:
+            self.caja -= q * p + COMISION
+            self.acc += q
+        elif a == 2:
+            self.caja += q * p - COMISION
+            self.acc -= q
+        r = min(max(self.B - p, 0), self.D)
+        V, qp = self.acc * p, self.Q * p
+        rrw, dd = r * r * (self.caja + V), self.D * self.D
+        if self.caja >= qp + COMISION and rrw >= dd * (V + qp):
+            self.pend = COMPRAR | self.Q
+        elif self.acc >= self.Q and rrw <= dd * (V - qp):
+            self.pend = VENDER | self.Q
+        else:
+            self.pend = MANTENER
+        return self.pend
+
+
+ESTRATEGIAS = {"mantener": Mantener, "echo": Echo, "v0": V0, "v1": V1, "v2": V2}
 
 
 # ---------------------------------------------------------------------------
@@ -228,24 +338,26 @@ def comparar(filas, ruta):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("-e", "--estrategia", default="v0", choices=ESTRATEGIAS)
-    ap.add_argument("-u", "--umbral", type=int, default=2, help="U de v0 (default 2)")
+    ap.add_argument("-e", "--estrategia", default="v2", choices=ESTRATEGIAS)
+    ap.add_argument("-u", "--umbral", type=int, help="U de v0/v1 (default 2 y 3)")
     ap.add_argument("-n", "--nticks", type=int, default=2000)
     ap.add_argument("-r", "--ronda", type=int, default=3, choices=(1, 2, 3),
                     help="ronda del tb (define cuantos precios caen en el reset)")
-    ap.add_argument("-s", "--serie", default="tb/practica.csv")
+    ap.add_argument("-s", "--serie", default="tb/practica_meta.csv",
+                    help="serie de precios (default: la de Meta, igual que make tb_p4)")
     ap.add_argument("--csv", help="guardar el detalle por tick (formato decisiones.csv)")
     ap.add_argument("--compara", help="decisiones.csv del tb para comparar tick a tick")
     args = ap.parse_args()
 
     precios = leer_serie(args.serie)[:args.nticks]
-    est = V0(args.umbral) if args.estrategia == "v0" else ESTRATEGIAS[args.estrategia]()
+    cls = ESTRATEGIAS[args.estrategia]
+    est = cls(args.umbral) if cls in (V0, V1) and args.umbral is not None else cls()
     filas, m = simular(est, precios, precios_en_reset(args.ronda))
 
     bh_w, bh_ord, bh_com, bh_dd = comprar_y_mantener(precios)
     print(f"Serie: {args.serie}, {len(precios)} ticks, ronda {args.ronda}"
           f" ({precios_en_reset(args.ronda)} precios en reset), estrategia: {args.estrategia}"
-          + (f" (U = {args.umbral})" if args.estrategia == "v0" else ""))
+          + (f" (U = {est.U})" if hasattr(est, "U") else ""))
     print(f"{'':22}{'patrimonio':>11}{'ordenes':>9}{'comisiones':>12}{'perdida max':>13}")
     print(f"{args.estrategia:22}{m.w:>11}{m.ordenes:>9}{m.ordenes * COMISION:>12}{m.max_dd:>13}")
     print(f"{'no operar':22}{CAJA0:>11}{0:>9}{0:>12}{0:>13}")
