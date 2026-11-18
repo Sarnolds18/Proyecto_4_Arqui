@@ -9,7 +9,10 @@
 // - Nicolás Villegas <navillegas@miuandes.cl>
 
 module pochoco_periph #(
-  parameter DEBOUNCE_TICK_BITS = 18 // ~10 ms at 25 MHz; override for fast sim
+  parameter DEBOUNCE_TICK_BITS = 18, // ~10 ms at 25 MHz; override for fast sim
+  // Cycle counter at 0x0C (P2). Off by default in P4: the trader does not
+  // read it and it costs ~164 LC (docs/luts.md). Off, 0x0C reads 0.
+  parameter CYCLE_COUNTER      = 0
 ) (
   input  wire        clk_i,
   input  wire        rst_ni,
@@ -61,13 +64,21 @@ module pochoco_periph #(
   // from reset; a write to this offset loads wdata_i instead (writing 0
   // zeroes it), so software can restart the count at the start of a round
   // instead of always subtracting two reads.
-  reg [31:0] cyc_q;
+  wire [31:0] cyc_q;
 
-  always @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) cyc_q <= 32'b0;
-    else if (access & we_i & (off == 6'd3)) cyc_q <= wdata_i;
-    else cyc_q <= cyc_q + 32'd1;
-  end
+  generate
+    if (CYCLE_COUNTER) begin : g_cyc
+      reg [31:0] cnt_q;
+      always @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) cnt_q <= 32'b0;
+        else if (access & we_i & (off == 6'd3)) cnt_q <= wdata_i;
+        else cnt_q <= cnt_q + 32'd1;
+      end
+      assign cyc_q = cnt_q;
+    end else begin : g_no_cyc
+      assign cyc_q = 32'b0;
+    end
+  endgenerate
 
   // Hex to 7-segment decoder function
   function [6:0] hex2seg;

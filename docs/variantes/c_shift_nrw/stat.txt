@@ -1,0 +1,24 @@
+
+19. Printing statistics.
+
+=== trade_top ===
+
+   Number of wires:                624
+   Number of wire bits:           4604
+   Number of public wires:         624
+   Number of public wire bits:    4604
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               1470
+     SB_CARRY                      241
+     SB_DFF                         21
+     SB_DFFE                         8
+     SB_DFFER                      127
+     SB_DFFESR                      12
+     SB_DFFR                         7
+     SB_DFFS                         3
+     SB_DFFSR                        1
+     SB_LUT4                      1038
+     SB_RAM40_4K                    12
+

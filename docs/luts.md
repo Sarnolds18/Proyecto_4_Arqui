@@ -1,5 +1,12 @@
 # Desglose de LUTs por módulo (A6)
 
+> **Actualización 18/11:** este desglose es el de la base del P2 (commit `1982fe6`). Lo aplicado
+> en L2 y los números del diseño final están en `docs/variantes/variantes.txt` y en el informe
+> 4.3: el contador de ciclos quedó apagado por parámetro (`CYCLE_COUNTER = 0`, necesario porque
+> con el botón de reset el SoC ya no cabe con contador) y `no_rw_check` quedó como macro
+> `RAM_NO_RW_CHECK`, validada con simulación post-síntesis. Los botones se mantienen: SW1 es el
+> botón de reset.
+
 Base para L2 (liberar LUTs). Este documento no cambia el RTL: las variantes se arman en copias
 temporales.
 

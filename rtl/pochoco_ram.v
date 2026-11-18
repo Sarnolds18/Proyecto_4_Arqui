@@ -30,6 +30,13 @@ module pochoco_ram #(
 
   localparam AddrW = $clog2(NumWords);
 
+  // RAM_NO_RW_CHECK (Proyecto 4, L2): yosys no emula la colision lectura/
+  // escritura en la misma direccion y ciclo (~200 LC menos, docs/luts.md).
+  // En Espino no ocurre: el puerto A solo lee programa y el B no usa el dato
+  // leido en el ciclo de un store. Validado con simulacion post-sintesis.
+`ifdef RAM_NO_RW_CHECK
+  (* no_rw_check *)
+`endif
   reg [31:0] mem [0:NumWords-1];
 
   initial begin

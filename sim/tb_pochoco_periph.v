@@ -6,7 +6,7 @@
 // DEBOUNCE_TICK_BITS is overridden small here purely to simulate fast; real
 // hardware uses the default 18 (~10ms at 25MHz, see rtl/debouncer.v).
 //
-// Run: iverilog -o /tmp/tb_periph.vvp sim/tb_pochoco_periph.v rtl/pochoco_periph.v
+// Run: iverilog -o /tmp/tb_periph.vvp sim/tb_pochoco_periph.v rtl/pochoco_periph.v rtl/debouncer.v
 //      vvp /tmp/tb_periph.vvp
 
 `timescale 1ns/1ps
@@ -27,7 +27,7 @@ module tb_pochoco_periph;
 
   integer errors = 0;
 
-  pochoco_periph #(.DEBOUNCE_TICK_BITS(4)) dut (
+  pochoco_periph #(.DEBOUNCE_TICK_BITS(4), .CYCLE_COUNTER(1)) dut (
     .clk_i   (clk_i),
     .rst_ni  (rst_ni),
     .sel_i   (sel_i),

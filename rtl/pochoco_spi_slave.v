@@ -30,7 +30,8 @@ module pochoco_spi_slave (
   // Register offsets
   localparam [5:0] REG_STATUS   = 6'd0,
                    REG_PRICE    = 6'd1,
-                   REG_DECISION = 6'd2;
+                   REG_DECISION = 6'd2,
+                   REG_SUMA     = 6'd3;   // solo con SOC_SMA (pochoco_sma.v)
 
   wire [5:0] off    = addr_i[7:2];
   wire       access = sel_i & req_i;
@@ -106,12 +107,33 @@ module pochoco_spi_slave (
     else if (wr & (off == REG_DECISION))  tx_hold <= wdata_i[7:0];
   end
 
+  // Proyecto 4, alternativa B: suma movil de los ultimos 16 precios
+  wire [11:0] suma;
+`ifdef SOC_SMA
+  reg price_valid_q;     // byte_done retrasado: price_q ya tiene el precio
+  always @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) price_valid_q <= 1'b0;
+    else         price_valid_q <= byte_done;
+  end
+
+  pochoco_sma u_sma (
+    .clk_i   (clk_i),
+    .rst_ni  (rst_ni),
+    .valid_i (price_valid_q),
+    .price_i (price_q),
+    .suma_o  (suma)
+  );
+`else
+  assign suma = 12'd0;
+`endif
+
   always @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) rdata_o <= 32'b0;
     else if (rd) begin
       case (off)
         REG_STATUS: rdata_o <= {30'b0, cs_active, new_price_q};
         REG_PRICE:  rdata_o <= {24'b0, price_q};
+        REG_SUMA:   rdata_o <= {20'b0, suma};
         default:    rdata_o <= 32'b0;
       endcase
     end

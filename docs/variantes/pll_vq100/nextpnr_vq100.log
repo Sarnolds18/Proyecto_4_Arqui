@@ -1,0 +1,20 @@
+Info: constrained 'i_Clk' to bel 'X0/Y8/io1'
+Info: constrained 'o_LED_1' to bel 'X13/Y6/io1'
+
+Info: Packing constants..
+Info: Packing IOs..
+Info: Packing LUT-FFs..
+Info:        0 LCs used as LUT4 only
+Info:       24 LCs used as LUT4 and DFF
+Info: Packing non-LUT FFs..
+Info:        0 LCs used as DFF only
+Info: Packing carries..
+Info:        0 LCs used as CARRY only
+Info: Packing indirect carry+LUT pairs...
+Info:        0 LUTs merged into carry LCs
+Info: Packing RAMs..
+Info: Placing PLLs..
+ERROR: PLL 'u' couldn't be placed anywhere, no suitable BEL found.
+
+ERROR: Packing design failed.
+0 warnings, 2 errors

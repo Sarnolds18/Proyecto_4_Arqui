@@ -11,7 +11,9 @@
 // The price arrives and the decision leaves through the SPI slave (PMOD
 // pins); the algorithm lives in sw/trade.s.
 
-module trade_top (
+module trade_top #(
+  parameter MemFile = "sw/trade.hex"   // make TRADE_HEX=... lo cambia con chparam
+) (
   input  wire       i_Clk,
 
   output wire [3:0] o_LED,
@@ -28,11 +30,37 @@ module trade_top (
   output wire       o_SPI_MISO
 );
 
+  // Alternativa de hardware A (macro SOC_PLL): el SoC corre con el PLL a
+  // 37,5 MHz (25 MHz * 24 / 16, parametros de `icepll -i 25 -o 37.5`). Sin
+  // SOC_PLL corre directo del oscilador de 25 MHz.
+  wire clk_soc;
+`ifdef SOC_PLL
+  wire pll_lock;
+  SB_PLL40_CORE #(
+    .FEEDBACK_PATH ("SIMPLE"),
+    .DIVR          (4'b0000),
+    .DIVF          (7'b0010111),
+    .DIVQ          (3'b100),
+    .FILTER_RANGE  (3'b010)
+  ) u_pll (
+    .REFERENCECLK  (i_Clk),
+    .PLLOUTGLOBAL  (clk_soc),
+    .LOCK          (pll_lock),
+    .RESETB        (1'b1),
+    .BYPASS        (1'b0)
+  );
+`else
+  assign clk_soc = i_Clk;
+`endif
+
   pochoco_soc #(
     .NumWords (512),
-    .MemFile  ("sw/trade.hex")
+    .MemFile  (MemFile)
   ) u_pochoco (
-    .i_Clk        (i_Clk),
+    .i_Clk        (clk_soc),
+`ifdef SOC_PLL
+    .i_PLL_Lock   (pll_lock),
+`endif
 
     .o_LED        (o_LED),
     .i_Switch     (i_Switch),

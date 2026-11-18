@@ -1,0 +1,618 @@
+Info: constrained 'i_Clk' to bel 'X0/Y8/io1'
+Warning: unmatched constraint 'i_UART_RX' (on line 5)
+Warning: unmatched constraint 'o_UART_TX' (on line 6)
+Info: constrained 'o_LED[0]' to bel 'X13/Y6/io1'
+Info: constrained 'o_LED[1]' to bel 'X13/Y7/io0'
+Info: constrained 'o_LED[2]' to bel 'X13/Y7/io1'
+Info: constrained 'o_LED[3]' to bel 'X13/Y8/io0'
+Info: constrained 'i_Switch[0]' to bel 'X13/Y4/io1'
+Info: constrained 'i_Switch[1]' to bel 'X13/Y3/io1'
+Info: constrained 'i_Switch[2]' to bel 'X13/Y6/io0'
+Info: constrained 'i_Switch[3]' to bel 'X13/Y4/io0'
+Info: constrained 'o_Segment1_A' to bel 'X0/Y13/io1'
+Info: constrained 'o_Segment1_B' to bel 'X0/Y13/io0'
+Info: constrained 'o_Segment1_C' to bel 'X5/Y17/io1'
+Info: constrained 'o_Segment1_D' to bel 'X6/Y17/io0'
+Info: constrained 'o_Segment1_E' to bel 'X6/Y17/io1'
+Info: constrained 'o_Segment1_F' to bel 'X0/Y14/io1'
+Info: constrained 'o_Segment1_G' to bel 'X0/Y14/io0'
+Info: constrained 'o_Segment2_A' to bel 'X1/Y17/io1'
+Info: constrained 'o_Segment2_B' to bel 'X2/Y17/io1'
+Info: constrained 'o_Segment2_C' to bel 'X3/Y17/io1'
+Info: constrained 'o_Segment2_D' to bel 'X4/Y17/io1'
+Info: constrained 'o_Segment2_E' to bel 'X5/Y17/io0'
+Info: constrained 'o_Segment2_F' to bel 'X0/Y12/io0'
+Info: constrained 'o_Segment2_G' to bel 'X4/Y17/io0'
+Info: constrained 'i_SPI_CS_n' to bel 'X13/Y11/io1'
+Info: constrained 'i_SPI_MOSI' to bel 'X13/Y11/io0'
+Info: constrained 'o_SPI_MISO' to bel 'X13/Y9/io0'
+Info: constrained 'i_SPI_SCLK' to bel 'X13/Y8/io1'
+
+Info: Packing constants..
+Info: Packing IOs..
+Info: Packing LUT-FFs..
+Info:      839 LCs used as LUT4 only
+Info:      125 LCs used as LUT4 and DFF
+Info: Packing non-LUT FFs..
+Info:      171 LCs used as DFF only
+Info: Packing carries..
+Info:       64 LCs used as CARRY only
+Info: Packing indirect carry+LUT pairs...
+Info:       26 LUTs merged into carry LCs
+Info: Packing RAMs..
+Info: Placing PLLs..
+Info: Packing special functions..
+Info: Packing PLLs..
+Info: Promoting globals..
+Info: promoting i_Clk$SB_IO_IN (fanout 320)
+Info: promoting u_pochoco.rst_ni_SB_LUT4_I3_O [reset] (fanout 137)
+Info: promoting u_pochoco.u_core.u_if.valid_q_SB_LUT4_I1_O [cen] (fanout 99)
+Info: Constraining chains...
+Info:        7 LCs used to legalise carry chains.
+Info: Checksum: 0x9672c695
+
+Info: Annotating ports with timing budgets for target frequency 25.00 MHz
+Info: Checksum: 0x53533a06
+
+Info: Device utilisation:
+Info: 	         ICESTORM_LC:  1183/ 1280    92%
+Info: 	        ICESTORM_RAM:    12/   16    75%
+Info: 	               SB_IO:    27/  112    24%
+Info: 	               SB_GB:     3/    8    37%
+Info: 	        ICESTORM_PLL:     0/    1     0%
+Info: 	         SB_WARMBOOT:     0/    1     0%
+
+Info: Placed 27 cells based on constraints.
+Info: Creating initial analytic placement for 950 cells, random placement wirelen = 15808.
+Info:     at initial placer iter 0, wirelen = 558
+Info:     at initial placer iter 1, wirelen = 493
+Info:     at initial placer iter 2, wirelen = 524
+Info:     at initial placer iter 3, wirelen = 501
+Info: Running main analytical placer, max placement attempts per cell = 187578.
+Info:     at iteration #1, type ALL: wirelen solved = 522, spread = 8568, legal = 9228; time = 0.08s
+Info:     at iteration #2, type ALL: wirelen solved = 668, spread = 8095, legal = 8416; time = 0.08s
+Info:     at iteration #3, type ALL: wirelen solved = 876, spread = 8005, legal = 8825; time = 0.09s
+Info:     at iteration #4, type ALL: wirelen solved = 993, spread = 7948, legal = 8491; time = 0.08s
+Info:     at iteration #5, type ALL: wirelen solved = 1026, spread = 7778, legal = 8887; time = 0.10s
+Info:     at iteration #6, type ALL: wirelen solved = 1142, spread = 7728, legal = 8469; time = 0.07s
+Info:     at iteration #7, type ALL: wirelen solved = 1253, spread = 7628, legal = 8278; time = 0.09s
+Info:     at iteration #8, type ALL: wirelen solved = 1322, spread = 7658, legal = 8685; time = 0.08s
+Info:     at iteration #9, type ALL: wirelen solved = 1372, spread = 7429, legal = 8694; time = 0.09s
+Info:     at iteration #10, type ALL: wirelen solved = 1362, spread = 7634, legal = 8598; time = 0.12s
+Info:     at iteration #11, type ALL: wirelen solved = 1405, spread = 7318, legal = 8574; time = 0.11s
+Info:     at iteration #12, type ALL: wirelen solved = 1663, spread = 7407, legal = 8297; time = 0.08s
+Info: HeAP Placer Time: 1.52s
+Info:   of which solving equations: 1.06s
+Info:   of which spreading cells: 0.10s
+Info:   of which strict legalisation: 0.11s
+
+Info: Running simulated annealing placer for refinement.
+Info:   at iteration #1: temp = 0.000000, timing cost = 521, wirelen = 8278
+Info:   at iteration #5: temp = 0.000000, timing cost = 421, wirelen = 7115
+Info:   at iteration #10: temp = 0.000000, timing cost = 427, wirelen = 6905
+Info:   at iteration #15: temp = 0.000000, timing cost = 420, wirelen = 6770
+Info:   at iteration #19: temp = 0.000000, timing cost = 417, wirelen = 6759 
+Info: SA placement time 2.17s
+
+Info: Max frequency for clock 'i_Clk$SB_IO_IN_$glb_clk': 39.19 MHz (PASS at 25.00 MHz)
+
+Info: Max delay <async>                         -> posedge i_Clk$SB_IO_IN_$glb_clk: 4.01 ns
+Info: Max delay posedge i_Clk$SB_IO_IN_$glb_clk -> <async>                        : 3.75 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 5 endpoint(s)
+Info:          + represents [1,5) endpoint(s)
+Info: [ 14482,  15706) |************+
+Info: [ 15706,  16930) |*********+
+Info: [ 16930,  18154) |***+
+Info: [ 18154,  19378) |*+
+Info: [ 19378,  20602) |**+
+Info: [ 20602,  21826) |***+
+Info: [ 21826,  23050) |****+
+Info: [ 23050,  24274) |**********************+
+Info: [ 24274,  25498) |********+
+Info: [ 25498,  26722) |+
+Info: [ 26722,  27946) |+
+Info: [ 27946,  29170) |+
+Info: [ 29170,  30394) |****+
+Info: [ 30394,  31618) |*****+
+Info: [ 31618,  32842) |*+
+Info: [ 32842,  34066) |**+
+Info: [ 34066,  35290) |***********************+
+Info: [ 35290,  36514) |*****************************+
+Info: [ 36514,  37738) |**************************************+
+Info: [ 37738,  38962) |************************************************************ 
+Info: Checksum: 0xf27418eb
+
+Info: Routing..
+Info: Setting up routing queue.
+Info: Routing 4050 arcs.
+Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
+Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
+Info:       1000 |      430        569 |  430   569 |      3564|       0.56       0.56|
+Info:       2000 |      949       1050 |  519   481 |      3242|       0.50       1.06|
+Info:       3000 |     1455       1544 |  506   494 |      2931|       0.72       1.78|
+Info:       4000 |     1840       2049 |  385   505 |      2373|       0.28       2.06|
+Info:       5000 |     2339       2550 |  499   501 |      2033|       0.40       2.46|
+Info:       6000 |     2902       2987 |  563   437 |      1721|       0.46       2.92|
+Info:       7000 |     3403       3486 |  501   499 |      1414|       0.52       3.44|
+Info:       8000 |     3973       3890 |  570   404 |      1215|       0.56       4.00|
+Info:       9000 |     4467       4371 |  494   481 |       966|       0.60       4.61|
+Info:      10000 |     5027       4787 |  560   416 |       785|       0.67       5.28|
+Info:      11000 |     5606       5207 |  579   420 |       651|       0.85       6.14|
+Info:      12000 |     6252       5561 |  646   354 |       530|       0.96       7.10|
+Info:      13000 |     6652       6135 |  400   574 |        90|       0.74       7.84|
+Info:      13262 |     6772       6278 |  120   143 |         0|       0.19       8.03|
+Info: Routing complete.
+Info: Router1 time 8.03s
+Info: Checksum: 0x0182039e
+
+Info: Critical path report for clock 'i_Clk$SB_IO_IN_$glb_clk' (posedge -> posedge):
+Info: curr total
+Info:  2.1  2.1  Source u_pochoco.u_ram.mem.1.0_RAM.RDATA_2
+Info:  0.9  3.0    Net u_pochoco.u_ram.mem.1.0_RDATA_5[0] budget 0.000000 ns (3,7) -> (2,7)
+Info:                Sink u_pochoco.u_ram.mem.1.0_RDATA_5_SB_LUT4_I1_LC.I1
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/brams_map.v:22.13-22.18
+Info:  0.4  3.4  Source u_pochoco.u_ram.mem.1.0_RDATA_5_SB_LUT4_I1_LC.O
+Info:  1.3  4.7    Net u_pochoco.u_ram.mem.1.0_RDATA_5_SB_LUT4_I1_O[0] budget 0.000000 ns (2,7) -> (5,8)
+Info:                Sink u_pochoco.u_ram.mem.1.0_RDATA_2_SB_LUT4_I1_O_SB_LUT4_O_1_LC.I2
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4  5.1  Source u_pochoco.u_ram.mem.1.0_RDATA_2_SB_LUT4_I1_O_SB_LUT4_O_1_LC.O
+Info:  0.6  5.7    Net u_pochoco.u_core.u_id.imm_target_SB_LUT4_O_7_I2[2] budget 0.000000 ns (5,8) -> (6,7)
+Info:                Sink u_pochoco.u_ram.mem.1.0_RDATA_2_SB_LUT4_I1_O_SB_LUT4_I2_LC.I2
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4  6.1  Source u_pochoco.u_ram.mem.1.0_RDATA_2_SB_LUT4_I1_O_SB_LUT4_I2_LC.O
+Info:  0.6  6.7    Net u_pochoco.u_core.u_id.imm_target_SB_LUT4_O_9_I1[0] budget 0.000000 ns (6,7) -> (6,8)
+Info:                Sink u_pochoco.u_core.u_id.u_alu.b_s_SB_LUT4_O_28_I2_SB_LUT4_I0_O_SB_LUT4_O_2_I0_SB_LUT4_O_LC.I0
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4  7.1  Source u_pochoco.u_core.u_id.u_alu.b_s_SB_LUT4_O_28_I2_SB_LUT4_I0_O_SB_LUT4_O_2_I0_SB_LUT4_O_LC.O
+Info:  0.6  7.7    Net u_pochoco.u_core.u_id.u_alu.b_s_SB_LUT4_O_28_I2_SB_LUT4_I0_O_SB_LUT4_O_2_I0[0] budget 0.000000 ns (6,8) -> (6,8)
+Info:                Sink u_pochoco.u_core.u_id.imm_target_SB_LUT4_O_I2_SB_LUT4_I0_O_SB_LUT4_I2_O_SB_LUT4_O_7_LC.I2
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4  8.1  Source u_pochoco.u_core.u_id.imm_target_SB_LUT4_O_I2_SB_LUT4_I0_O_SB_LUT4_I2_O_SB_LUT4_O_7_LC.O
+Info:  1.6  9.6    Net u_pochoco.u_core.u_id.imm_target_SB_LUT4_O_I2_SB_LUT4_I0_O_SB_LUT4_I2_O[1] budget 0.000000 ns (6,8) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_19$CARRY.I3
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:66.28-66.53
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:49.21-49.23
+Info:  0.3 10.0  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_19$CARRY.O
+Info:  0.6 10.5    Net u_pochoco.u_core.u_id.operand_b[1] budget 0.000000 ns (5,1) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_19$CARRY.I1
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:41.14-41.19
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:  0.3 10.8  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_19$CARRY.COUT
+Info:  0.0 10.8    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[1] budget 0.000000 ns (5,1) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_8$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 10.9  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_8$CARRY.COUT
+Info:  0.0 10.9    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[2] budget 0.000000 ns (5,1) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_6$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 11.1  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_6$CARRY.COUT
+Info:  0.0 11.1    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[3] budget 0.000000 ns (5,1) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_5$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 11.2  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_5$CARRY.COUT
+Info:  0.0 11.2    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[4] budget 0.000000 ns (5,1) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_4$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 11.3  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_4$CARRY.COUT
+Info:  0.0 11.3    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[5] budget 0.000000 ns (5,1) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_3$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 11.4  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_3$CARRY.COUT
+Info:  0.0 11.4    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[6] budget 0.000000 ns (5,1) -> (5,1)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_2$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 11.6  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_2$CARRY.COUT
+Info:  0.2 11.8    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[7] budget 0.190000 ns (5,1) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_1$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 11.9  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_1$CARRY.COUT
+Info:  0.0 11.9    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[8] budget 0.000000 ns (5,2) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 12.0  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO$CARRY.COUT
+Info:  0.0 12.0    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[9] budget 0.000000 ns (5,2) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_29$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 12.1  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_29$CARRY.COUT
+Info:  0.0 12.1    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[10] budget 0.000000 ns (5,2) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_28$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 12.3  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_28$CARRY.COUT
+Info:  0.0 12.3    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[11] budget 0.000000 ns (5,2) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_27$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 12.4  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_27$CARRY.COUT
+Info:  0.0 12.4    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[12] budget 0.000000 ns (5,2) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_26$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 12.5  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_26$CARRY.COUT
+Info:  0.0 12.5    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[13] budget 0.000000 ns (5,2) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_25$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 12.6  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_25$CARRY.COUT
+Info:  0.0 12.6    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[14] budget 0.000000 ns (5,2) -> (5,2)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_24$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 12.8  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_24$CARRY.COUT
+Info:  0.2 13.0    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[15] budget 0.190000 ns (5,2) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_23$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 13.1  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_23$CARRY.COUT
+Info:  0.0 13.1    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[16] budget 0.000000 ns (5,3) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_22$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 13.2  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_22$CARRY.COUT
+Info:  0.0 13.2    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[17] budget 0.000000 ns (5,3) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_21$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 13.3  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_21$CARRY.COUT
+Info:  0.0 13.3    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[18] budget 0.000000 ns (5,3) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_20$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 13.5  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_20$CARRY.COUT
+Info:  0.0 13.5    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[19] budget 0.000000 ns (5,3) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_18$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 13.6  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_18$CARRY.COUT
+Info:  0.0 13.6    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[20] budget 0.000000 ns (5,3) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_17$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 13.7  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_17$CARRY.COUT
+Info:  0.0 13.7    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[21] budget 0.000000 ns (5,3) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_16$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 13.8  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_16$CARRY.COUT
+Info:  0.0 13.8    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[22] budget 0.000000 ns (5,3) -> (5,3)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_15$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 14.0  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_15$CARRY.COUT
+Info:  0.2 14.2    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[23] budget 0.190000 ns (5,3) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_14$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 14.3  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_14$CARRY.COUT
+Info:  0.0 14.3    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[24] budget 0.000000 ns (5,4) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_13$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 14.4  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_13$CARRY.COUT
+Info:  0.0 14.4    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[25] budget 0.000000 ns (5,4) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_12$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 14.5  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_12$CARRY.COUT
+Info:  0.0 14.5    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[26] budget 0.000000 ns (5,4) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_11$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 14.7  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_11$CARRY.COUT
+Info:  0.0 14.7    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[27] budget 0.000000 ns (5,4) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_10$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 14.8  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_10$CARRY.COUT
+Info:  0.0 14.8    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[28] budget 0.000000 ns (5,4) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_9$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 14.9  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_9$CARRY.COUT
+Info:  0.0 14.9    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[29] budget 0.000000 ns (5,4) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_7$CARRY.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 15.0  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I3_SB_CARRY_CO_7$CARRY.COUT
+Info:  0.0 15.0    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[30] budget 0.000000 ns (5,4) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_LC.CIN
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:51.21-51.22
+Info:  0.1 15.2  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_LC.COUT
+Info:  0.5 15.6    Net $nextpnr_ICESTORM_LC_5$I3 budget 0.560000 ns (5,4) -> (5,5)
+Info:                Sink $nextpnr_ICESTORM_LC_5.I3
+Info:  0.3 15.9  Source $nextpnr_ICESTORM_LC_5.O
+Info:  0.6 16.5    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_I0[31] budget 13.394000 ns (5,5) -> (5,4)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_LC.I0
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:61.19-87.4
+Info:                  rtl/espino_core/espino_alu.v:47.21-47.30
+Info:                  rtl/espino_core/espino_id_stage.v:115.14-121.4
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:                  /usr/bin/../share/yosys/ice40/arith_map.v:37.23-37.25
+Info:  0.4 17.0  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_O_LC.O
+Info:  1.3 18.3    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3[2] budget 2.232000 ns (5,4) -> (6,10)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_LC.I0
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4 18.8  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_LC.O
+Info:  0.6 19.3    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_O[2] budget 2.232000 ns (6,10) -> (7,11)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_O_SB_LUT4_I2_LC.I2
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4 19.7  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_O_SB_LUT4_I2_LC.O
+Info:  0.6 20.3    Net u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_O_SB_LUT4_I2_O[0] budget 2.232000 ns (7,11) -> (8,11)
+Info:                Sink u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_O_SB_LUT4_I2_O_SB_LUT4_I2_LC.I2
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4 20.7  Source u_pochoco.u_core.u_if.valid_q_SB_LUT4_I3_O_SB_LUT4_O_1_I2_SB_LUT4_O_I1_SB_LUT4_O_I3_SB_LUT4_I0_O_SB_LUT4_I2_O_SB_LUT4_I2_LC.O
+Info:  0.6 21.3    Net u_pochoco.u_ram.mem.0.2_RDATA_SB_LUT4_I0_O_SB_LUT4_I1_O[2] budget 2.013000 ns (8,11) -> (8,12)
+Info:                Sink u_pochoco.u_core.u_rf.u_bankA.wdata_i_SB_LUT4_O_24_I1_SB_LUT4_O_2_LC.I2
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4 21.7  Source u_pochoco.u_core.u_rf.u_bankA.wdata_i_SB_LUT4_O_24_I1_SB_LUT4_O_2_LC.O
+Info:  1.3 22.9    Net u_pochoco.u_core.u_rf.u_bankA.wdata_i_SB_LUT4_O_24_I0[1] budget 2.016000 ns (8,12) -> (5,14)
+Info:                Sink u_pochoco.u_core.u_if.pc_next_SB_LUT4_O_3_I2_SB_LUT4_O_I2_SB_LUT4_I2_O_SB_LUT4_O_1_LC.I3
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.3 23.2  Source u_pochoco.u_core.u_if.pc_next_SB_LUT4_O_3_I2_SB_LUT4_O_I2_SB_LUT4_I2_O_SB_LUT4_O_1_LC.O
+Info:  1.1 24.4    Net u_pochoco.u_core.u_if.pc_next_SB_LUT4_O_3_I2_SB_LUT4_O_I2_SB_LUT4_I2_O[1] budget 2.016000 ns (5,14) -> (2,14)
+Info:                Sink u_pochoco.u_core.u_rf.u_bankA.wdata_i_SB_LUT4_O_14_LC.I1
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4 24.8  Source u_pochoco.u_core.u_rf.u_bankA.wdata_i_SB_LUT4_O_14_LC.O
+Info:  1.0 25.7    Net u_pochoco.u_core.rf_wdata[17] budget 2.016000 ns (2,14) -> (3,13)
+Info:                Sink u_pochoco.u_core.u_rf.u_bankB.u_hi_RAM.WDATA_1
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/espino_core/espino_core.v:89.24-99.4
+Info:                  rtl/espino_core/espino_register_file.v:53.22-53.29
+Info:                  rtl/pochoco_soc.v:69.43-81.4
+Info:  0.1 25.8  Setup u_pochoco.u_core.u_rf.u_bankB.u_hi_RAM.WDATA_1
+Info: 11.6 ns logic, 14.2 ns routing
+
+Info: Critical path report for cross-domain path '<async>' -> 'posedge i_Clk$SB_IO_IN_$glb_clk':
+Info: curr total
+Info:  0.0  0.0  Source i_Switch[2]$sb_io.D_IN_0
+Info:  1.3  1.3    Net i_Switch[2]$SB_IO_IN budget 13.018000 ns (13,6) -> (12,4)
+Info:                Sink u_pochoco.u_periph.u_debounce.btn_prev_sample_SB_LUT4_I1_LC.I0
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/pochoco_periph.v:57.51-61.4
+Info:                  rtl/debouncer.v:25.23-25.28
+Info:                  rtl/pochoco_soc.v:150.18-163.4
+Info:  0.4  1.7  Source u_pochoco.u_periph.u_debounce.btn_prev_sample_SB_LUT4_I1_LC.O
+Info:  0.6  2.3    Net u_pochoco.u_periph.u_debounce.btn_prev_sample_SB_LUT4_I1_O[1] budget 12.854000 ns (12,4) -> (12,4)
+Info:                Sink u_pochoco.u_periph.u_debounce.tick_SB_LUT4_I3_LC.I2
+Info:                Defined in:
+Info:                  /usr/bin/../share/yosys/ice40/cells_map.v:6.21-6.22
+Info:  0.4  2.7  Source u_pochoco.u_periph.u_debounce.tick_SB_LUT4_I3_LC.O
+Info:  1.6  4.3    Net u_pochoco.u_periph.u_debounce.btn_estable_SB_DFFE_Q_E budget 12.854000 ns (12,4) -> (9,3)
+Info:                Sink u_pochoco.u_periph.u_debounce.btn_estable_SB_DFFE_Q_DFFLC.CEN
+Info:  0.1  4.4  Setup u_pochoco.u_periph.u_debounce.btn_estable_SB_DFFE_Q_DFFLC.CEN
+Info: 0.9 ns logic, 3.5 ns routing
+
+Info: Critical path report for cross-domain path 'posedge i_Clk$SB_IO_IN_$glb_clk' -> '<async>':
+Info: curr total
+Info:  0.5  0.5  Source u_pochoco.u_periph.digit_q_SB_DFFER_Q_DFFLC.O
+Info:  1.3  1.9    Net u_pochoco.u_periph.digit_q[7] budget 19.506001 ns (1,11) -> (2,16)
+Info:                Sink o_Segment1_D_SB_LUT4_O_LC.I0
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/pochoco_periph.v:36.14-36.21
+Info:                  rtl/pochoco_soc.v:150.18-163.4
+Info:  0.4  2.3  Source o_Segment1_D_SB_LUT4_O_LC.O
+Info:  1.6  4.0    Net o_Segment1_D$SB_IO_OUT budget 19.506001 ns (2,16) -> (6,17)
+Info:                Sink o_Segment1_D$sb_io.D_OUT_0
+Info:                Defined in:
+Info:                  rtl/trade_top.v:59.5-81.4
+Info:                  rtl/pochoco_soc.v:23.63-23.75
+Info: 1.0 ns logic, 3.0 ns routing
+
+Info: Max frequency for clock 'i_Clk$SB_IO_IN_$glb_clk': 38.71 MHz (PASS at 25.00 MHz)
+
+Info: Max delay <async>                         -> posedge i_Clk$SB_IO_IN_$glb_clk: 4.41 ns
+Info: Max delay posedge i_Clk$SB_IO_IN_$glb_clk -> <async>                        : 3.96 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 5 endpoint(s)
+Info:          + represents [1,5) endpoint(s)
+Info: [ 14169,  15408) |***************+
+Info: [ 15408,  16647) |******+
+Info: [ 16647,  17886) |***+
+Info: [ 17886,  19125) |**+
+Info: [ 19125,  20364) |**+
+Info: [ 20364,  21603) |***+
+Info: [ 21603,  22842) |***+
+Info: [ 22842,  24081) |*****+
+Info: [ 24081,  25320) |************************+
+Info: [ 25320,  26559) |+
+Info: [ 26559,  27798) |+
+Info: [ 27798,  29037) |**+
+Info: [ 29037,  30276) |****+
+Info: [ 30276,  31515) |**+
+Info: [ 31515,  32754) |*+
+Info: [ 32754,  33993) |**+
+Info: [ 33993,  35232) |*******+
+Info: [ 35232,  36471) |*********************+
+Info: [ 36471,  37710) |************************************************************ 
+Info: [ 37710,  38949) |*********************************************************+
+2 warnings, 0 errors
+
+Info: Program finished normally.

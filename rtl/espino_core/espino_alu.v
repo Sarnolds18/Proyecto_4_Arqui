@@ -69,10 +69,16 @@ module espino_alu (
       ALU_AND:  result_o = operand_a_i & operand_b_i;
       ALU_SLT:  result_o = {31'b0, cmp_lt};
       ALU_SLTU: result_o = {31'b0, cmp_ltu};
-      // Shifts disabled to save LUTs
-      // ALU_SLL:  result_o = operand_a_i << shamt;
-      // ALU_SRL:  result_o = operand_a_i >> shamt;
-      // ALU_SRA:  result_o = a_s >>> shamt;
+      // Shifts disabled to save LUTs. Proyecto 4, alternativa C: la macro
+      // ESPINO_SHIFTER habilita solo SLL/SLLI (lo que usa trade_shift.s) y
+      // ESPINO_SHIFTER_FULL habilita los tres (para comparar el costo).
+`ifdef ESPINO_SHIFTER_FULL
+      ALU_SLL:  result_o = operand_a_i << shamt;
+      ALU_SRL:  result_o = operand_a_i >> shamt;
+      ALU_SRA:  result_o = a_s >>> shamt;
+`elsif ESPINO_SHIFTER
+      ALU_SLL:  result_o = operand_a_i << shamt;
+`endif
       default:  result_o = operand_a_i + operand_b_i;
     endcase
   end

@@ -13,6 +13,9 @@ module pochoco_soc #(
   parameter MemFile    = "../sw/blink.hex"
 ) (
   input  wire       i_Clk,
+`ifdef SOC_PLL
+  input  wire       i_PLL_Lock,      // trade_top con PLL: el POR espera el lock
+`endif
 
   output wire [3:0] o_LED,
   input  wire [3:0] i_Switch,
@@ -37,8 +40,21 @@ module pochoco_soc #(
   // is checked (no full-width compare) to save LUTs.
   reg  [12:0] por_cnt = 13'b0;
   wire        rst_ni;
+`ifdef SOC_PLL
+  wire por_en = i_PLL_Lock;
+`else
+  wire por_en = 1'b1;
+`endif
+  // Reset por boton (Proyecto 4): mientras i_Switch[0] este apretado el
+  // contador vuelve a 0, asi que al soltarlo se repite el reset de encendido
+  // completo (core, esclavo SPI con DECISION = 0 y perifericos). Sincronizado
+  // con 2 FF; los rebotes solo alargan el reset. Testbench: sim/tb_reset_boton.v
+  reg [1:0] btn_rst_sync = 2'b00;
+  always @(posedge clk) btn_rst_sync <= {btn_rst_sync[0], i_Switch[0]};
+
   always @(posedge clk) begin
-    if (!por_cnt[12]) por_cnt <= por_cnt + 13'd1;
+    if (btn_rst_sync[1])                por_cnt <= 13'd0;
+    else if (!por_cnt[12] && por_en)    por_cnt <= por_cnt + 13'd1;
   end
   assign rst_ni = por_cnt[12];
 
@@ -64,10 +80,16 @@ module pochoco_soc #(
     .data_rdata_i  (data_rdata)
   );
 
-  wire is_mmio, spi_sel, per_sel;
+  wire is_mmio, spi_sel, per_sel, mul_sel;
   assign is_mmio = data_addr[31];
-  assign per_sel = is_mmio & ~data_addr[16];
-  assign spi_sel = is_mmio &  data_addr[16];
+`ifdef SOC_MUL
+  // Proyecto 4, alternativa D: multiplicador en 0x8002_0000 (addr[17])
+  assign mul_sel = is_mmio &  data_addr[17];
+`else
+  assign mul_sel = 1'b0;
+`endif
+  assign per_sel = is_mmio & ~data_addr[16] & ~mul_sel;
+  assign spi_sel = is_mmio &  data_addr[16] & ~mul_sel;
 
   wire ram_b_req, per_req, spi_req;
   assign ram_b_req = data_req & ~is_mmio;
@@ -76,18 +98,38 @@ module pochoco_soc #(
 
   wire [31:0] ram_b_rdata, per_rdata, spi_rdata;
 
-  reg rd_is_per, rd_is_spi;
+  reg rd_is_per, rd_is_spi, rd_is_mul;
   always @(posedge clk or negedge rst_ni) begin
     if (!rst_ni) begin
       rd_is_per <= 1'b0;
       rd_is_spi <= 1'b0;
+      rd_is_mul <= 1'b0;
     end else if (data_req & ~data_we) begin
       rd_is_per <= per_sel;
       rd_is_spi <= spi_sel;
+      rd_is_mul <= mul_sel;
     end
   end
+
+  wire [31:0] mul_rdata;
+`ifdef SOC_MUL
+  pochoco_mul u_mul (
+    .clk_i   (clk),
+    .rst_ni  (rst_ni),
+    .sel_i   (mul_sel),
+    .req_i   (data_req & mul_sel),
+    .we_i    (data_we),
+    .addr_i  (data_addr[7:0]),
+    .wdata_i (data_wdata),
+    .rdata_o (mul_rdata)
+  );
+`else
+  assign mul_rdata = 32'd0;
+`endif
+
   assign data_rdata = rd_is_per ? per_rdata :
-                      rd_is_spi ? spi_rdata : ram_b_rdata;
+                      rd_is_spi ? spi_rdata :
+                      rd_is_mul ? mul_rdata : ram_b_rdata;
 
   pochoco_ram #(.NumWords(NumWords), .MemFile(MemFile)) u_ram (
     .clk_i     (clk),
