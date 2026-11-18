@@ -15,6 +15,7 @@ Uso (desde la raiz del repo):
   python3 ref/banco.py -f nivel -f nivrev      solo esas familias
   python3 ref/banco.py --csv docs/informe/datos/banco.csv --top 40
   BANCO_RONDA=2 python3 ref/banco.py ...     grilla de la ronda 2 (refinamiento)
+  BANCO_RONDA=4 python3 ref/banco.py ...     robustez: + 64 escenarios por familia y V2 como rival
 """
 
 import argparse
@@ -26,8 +27,8 @@ import statistics as st
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from trader import simular, comprar_y_mantener, V0, V1, CAJA0  # noqa: E402
-from series import reales, sinteticas  # noqa: E402
+from trader import simular, comprar_y_mantener, V0, V1, V2, CAJA0  # noqa: E402
+from series import reales, sinteticas, escenarios, FAMILIAS  # noqa: E402
 import estrategias as E  # noqa: E402
 
 
@@ -55,6 +56,19 @@ def grilla3():
         g.append(("exacto", f"exacto k={k} {a}-{b} q={q}", (E.NivelExacto, dict(a=a, b=b, q=q, k=k))))
     g.append(("ref", "lote cuadratica 100-255 q=40 extra=0 (r2)", (E.NivelLote, dict(forma="cuadratica", q=40, extra=0))))
     g.append(("ref", "V1 rev N=16 U=3 lotes=2", (E.Reversion, dict())))
+    return g
+
+
+def grilla4():
+    """Ronda 4 (robustez, 18/11 tarde): V2 + reversion como desplazamiento del nivel (F12),
+    lotes mas chicos, exponente 1 o 2. Se evalua tambien por familia de escenario."""
+    g = []
+    for q, e in itertools.product((10, 20, 30, 40), (1, 2)):
+        g.append(("nivmr", f"nivmr q={q} e={e} k=0", (E.NivelMR, dict(q=q, e=e, k=0))))
+        for k, N, U in itertools.product((10, 20, 40), (16, 64), (1, 3)):
+            g.append(("nivmr", f"nivmr q={q} e={e} k={k} N={N} U={U}", (E.NivelMR, dict(q=q, e=e, k=k, N=N, U=U))))
+    g.append(("ref", "V1 rev N=16 U=3 lotes=2", (E.Reversion, dict())))
+    g.append(("ref", "rev N=8 U=5 lotes=2", (E.Reversion, dict(N=8, U=5, lotes=2))))
     return g
 
 
@@ -88,11 +102,18 @@ RIVALES = None
 GRILLA = None
 
 
+RONDA = os.environ.get("BANCO_RONDA", "1")
+
+
 def _cargar():
     global SERIES, RIVALES, GRILLA
     SERIES = {**sinteticas(48), **reales()}
-    GRILLA = {"2": grilla2, "3": grilla3}.get(os.environ.get("BANCO_RONDA"), grilla)()
+    if RONDA == "4":
+        SERIES.update(escenarios(8))
+    GRILLA = {"2": grilla2, "3": grilla3, "4": grilla4}.get(RONDA, grilla)()
     rivales = [V0, V1, (E.Momentum, dict(Nc=8, Nl=64)), (E.Nivel, dict())]
+    if RONDA == "4":
+        rivales.append(V2)
     RIVALES = {}
     for n, p in SERIES.items():
         ws = [comprar_y_mantener(p)[0], CAJA0]
@@ -105,18 +126,29 @@ def _cargar():
 def conjunto(nombre):
     if nombre.startswith("sint"):
         return "ajuste" if int(nombre[4:]) < 24 else "prueba"
+    if nombre.startswith("esc_"):
+        return "esc_ajuste" if int(nombre.rsplit("_", 1)[1]) < 4 else "esc_prueba"
     return "reales"
+
+
+def familia(nombre):
+    if nombre.startswith("esc_"):
+        return nombre[4:].rsplit("_", 1)[0]
+    return "sint" if nombre.startswith("sint") else "reales"
 
 
 def evaluar(k):
     fam, nombre, (cls, kw) = GRILLA[k]
-    por = {"ajuste": [], "prueba": [], "reales": []}
+    por = {"ajuste": [], "prueba": [], "reales": [], "esc_ajuste": [], "esc_prueba": []}
+    por_fam = {}
     for n, p in SERIES.items():
         _, m = simular(cls(**kw), p, 0)
         bh = RIVALES[n][0]
         puesto = sum(1.0 if m.w > r else 0.5 if m.w == r else 0.0 for r in RIVALES[n]) / len(RIVALES[n])
         por[conjunto(n)].append((m.w - bh, puesto, m.ordenes, m.max_dd, m.w))
-    res = {"familia": fam, "nombre": nombre}
+        por_fam.setdefault(familia(n), []).append(puesto)
+    por = {c: v for c, v in por.items() if v}
+    res = {"familia": fam, "nombre": nombre, "fam": {f: st.mean(v) for f, v in por_fam.items()}}
     for c, v in por.items():
         ex = [x[0] for x in v]
         res[c] = {"mediana": st.median(ex), "media": st.mean(ex), "peor": min(ex),
@@ -124,6 +156,31 @@ def evaluar(k):
                   "ordenes": st.mean(x[2] for x in v), "dd": st.mean(x[3] for x in v)}
     res["reales_w"] = [x[4] for x in por["reales"]]
     return res
+
+
+def informe4(rs, args):
+    """Ronda 4: orden por robustez = media del puesto por familia en los conjuntos
+    de ajuste (sint ajuste + esc ajuste) + peor familia; se confirma en prueba."""
+    for r in rs:
+        r["robusto"] = 0.5 * (r["ajuste"]["puesto"] + r["esc_ajuste"]["puesto"]) + 0.5 * min(r["fam"].values())
+    rs.sort(key=lambda r: -r["robusto"])
+    fams = ["sint", "reales"] + list(FAMILIAS)
+    print(f"{len(rs)} configuraciones, {len(SERIES)} series. Puesto (0-1) frente a rivales "
+          "(comprar y mantener, no operar, V0, V1, momentum, nivel lineal, V2). Orden: robustez.")
+    cab = f"{'configuracion':34}{'robusto':>8}{'aj':>6}{'pr':>6}{'escA':>6}{'escP':>6}" + "".join(f"{f[:7]:>8}" for f in fams)
+    print(cab)
+    for r in rs[:args.top]:
+        print(f"{r['nombre'][:34]:34}{r['robusto']:8.3f}{r['ajuste']['puesto']:6.3f}{r['prueba']['puesto']:6.3f}"
+              f"{r['esc_ajuste']['puesto']:6.3f}{r['esc_prueba']['puesto']:6.3f}" + "".join(f"{r['fam'][f]:8.3f}" for f in fams))
+    if args.csv:
+        os.makedirs(os.path.dirname(args.csv) or ".", exist_ok=True)
+        with open(args.csv, "w", newline="") as fh:
+            w = csv.writer(fh)
+            w.writerow(["configuracion", "robusto"] + [f"{c}_{k}" for c in ("ajuste", "prueba", "esc_ajuste", "esc_prueba", "reales")
+                                                        for k in ("puesto", "mediana", "peor", "gana")] + [f"fam_{f}" for f in fams])
+            for r in rs:
+                w.writerow([r["nombre"], round(r["robusto"], 4)] + [round(r[c][k], 4) for c in ("ajuste", "prueba", "esc_ajuste", "esc_prueba", "reales")
+                                                                   for k in ("puesto", "mediana", "peor", "gana")] + [round(r["fam"][f], 4) for f in fams])
 
 
 def main():
@@ -139,6 +196,9 @@ def main():
     with mp.get_context("fork").Pool(args.j) as pool:
         rs = pool.map(evaluar, idx, chunksize=1)
 
+    if RONDA == "4":
+        informe4(rs, args)
+        return
     # orden: puesto en ajuste (lo que se optimiza); se reporta prueba y reales
     rs.sort(key=lambda r: -r["ajuste"]["puesto"])
     print(f"{len(rs)} configuraciones, {len(SERIES)} series de 20.000 ticks. Orden: puesto en ajuste.")

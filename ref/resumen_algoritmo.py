@@ -48,3 +48,24 @@ for c, ns in conj.items():
             ords.append(m.ordenes)
         print(f"| {c} | {nom} | {st.median(ex):.0f} | {st.mean(ex):.0f} | {min(ex)} | {max(ex)} | "
               f"{sum(e > 0 for e in ex)}/{len(ex)} | {st.mean(ords):.0f} |")
+
+print("\n## 4. Sensibilidad al rango: las 120 series (48 sinteticas, 64 escenarios, 8 reales) re-normalizadas a otros rangos\n")
+from series import escenarios  # noqa: E402
+S4 = {**sinteticas(48), **escenarios(8), **reales()}
+
+
+def comprimir(p, lo, hi):
+    a, b = min(p), max(p)
+    return [int(round(lo + (hi - lo) * (x - a) / (b - a))) for x in p]
+
+
+print("| Rango de la serie | V2 gana a comprar y mantener | V2 exceso mediano | V1 gana | V1 exceso mediano |")
+print("|---|---:|---:|---:|---:|")
+for lo, hi in ((100, 255), (110, 245), (120, 235), (130, 220), (100, 200), (155, 255), (140, 180)):
+    e2, e1 = [], []
+    for s in S4.values():
+        q = comprimir(s, lo, hi)
+        bh = comprar_y_mantener(q)[0]
+        e2.append(simular(V2(), q, 0)[1].w - bh)
+        e1.append(simular(V1(), q, 0)[1].w - bh)
+    print(f"| {lo}-{hi} | {sum(e > 0 for e in e2)}/{len(e2)} | {st.median(e2):.0f} | {sum(e > 0 for e in e1)}/{len(e1)} | {st.median(e1):.0f} |")

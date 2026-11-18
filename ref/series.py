@@ -108,6 +108,85 @@ def sinteticas(n=48, semilla=2026, banda=None):
     return out
 
 
+FAMILIAS = ("rango", "alza", "baja", "v", "v_inv", "pico_inicial", "caida_rebote", "escalones")
+
+
+def _escenario(rng, familia):
+    """Precio por minuto con la microestructura de _candidata y una forma de
+    fondo segun la familia (en log-precio, antes de normalizar):
+      rango         reversion lenta a un nivel (Ornstein-Uhlenbeck de dias)
+      alza / baja   tendencia sostenida
+      v / v_inv     baja y luego sube (o al reves), quiebre al azar
+      pico_inicial  salto fuerte en los primeros dias y luego lateral (Netflix de la practica)
+      caida_rebote  caida brusca a mitad de la serie y recuperacion parcial
+      escalones     saltos de apertura grandes y raros (resultados trimestrales)
+    """
+    dias, por_dia = 52, 390
+    n = dias * por_dia
+    vol0 = rng.uniform(4e-4, 1.4e-3)
+    micro = rng.uniform(0.0, 0.5)
+    gap = rng.uniform(2, 8)
+    amp = rng.uniform(0.15, 0.45)                 # amplitud de la forma de fondo (log)
+    q = rng.uniform(0.3, 0.7)                     # punto de quiebre
+    fondo = []
+    for i in range(n):
+        u = i / n
+        if familia == "alza":
+            f = amp * u
+        elif familia == "baja":
+            f = -amp * u
+        elif familia == "v":
+            f = -amp * (u / q if u < q else (1 - u) / (1 - q))
+        elif familia == "v_inv":
+            f = amp * (u / q if u < q else (1 - u) / (1 - q))
+        elif familia == "pico_inicial":
+            t0 = rng.uniform(0.02, 0.1) if i == 0 else t0  # noqa: F821
+            f = amp * min(1.0, max(0.0, (u - t0) / 0.02)) * (1 - 0.4 * max(0.0, u - t0 - 0.03))
+        elif familia == "caida_rebote":
+            f = -amp * min(1.0, max(0.0, (u - q) / 0.01)) * (1 - 0.6 * max(0.0, u - q) / (1 - q))
+        else:
+            f = 0.0
+        fondo.append(f)
+    lv, x, out, ou, k = 0.0, 0.0, [], 0.0, 0
+    for d in range(dias):
+        lv = 0.7 * lv + rng.gauss(0, 0.35)
+        vol = vol0 * math.exp(lv)
+        salto = rng.gauss(0, gap * vol)
+        if familia == "escalones" and rng.random() < 0.08:
+            salto += rng.choice((-1, 1)) * rng.uniform(0.05, 0.15)
+        x += salto
+        for _ in range(por_dia):
+            if familia == "rango":
+                ou += -ou / (5 * por_dia) + rng.gauss(0, vol)
+                nivel = ou
+            else:
+                x += rng.gauss(0, vol)
+                nivel = x
+            out.append(fondo[k] + nivel + rng.gauss(0, micro * vol))
+            k += 1
+    return normalizar([math.exp(v) for v in out[:NTICKS]])
+
+
+def escenarios(por_familia=8, semilla=777, banda=None):
+    """por_familia series de cada familia que pasan el filtro de realismo."""
+    if banda is None:
+        banda = {"ceros": (0.40, 0.75), "rebote": (0.18, 0.38), "sigue": (0.05, 0.18)}
+    rng = random.Random(semilla)
+    out = {}
+    for fam in FAMILIAS:
+        k = intentos = 0
+        while k < por_familia:
+            intentos += 1
+            p = _escenario(rng, fam)
+            e = estadisticas(p)
+            if all(lo <= e[c] <= hi for c, (lo, hi) in banda.items()):
+                out[f"esc_{fam}_{k}"] = p
+                k += 1
+            if intentos > 100 * por_familia:
+                raise RuntimeError(f"filtro de realismo rechaza la familia {fam}")
+    return out
+
+
 def estres(n=NTICKS, semilla=7):
     """Serie de estres para validar trade.s (no es de practica ni se usa para
     elegir el algoritmo): oscila entre ~90 y 255 con periodo variable y ruido,

@@ -369,3 +369,43 @@ class NivelExacto:
         else:
             self.pend = MANTENER
         return self.pend
+
+
+# --------------------------------------------------------------------- F12
+class NivelMR:
+    """F12: NivelExacto (V2 generalizada) + reversion a la media como
+    desplazamiento del nivel efectivo, exacta y sin division.
+
+    s = +1 si p < media(N) - U, -1 si p > media(N) + U, 0 si no
+    r = clamp(b - p + k*s, 0, D)              (k = 0: es V2 con lote q)
+    exposicion objetivo = (r/D)^e, e = 1 o 2; ordenes de q como V2:
+        compra q si caja >= qp + C y r^e * W >= D^e * (V + qp)
+        vende  q si acc >= q      y r^e * W <= D^e * (V - qp)
+    """
+    def __init__(self, a=LO, b=HI, q=40, e=2, k=0, N=16, U=2):
+        self.a, self.b, self.D, self.q, self.e, self.k = a, b, b - a, q, e, k
+        self.s, self.U = SMA(N), U
+        self.caja, self.acc, self.pend = 10000, 0, MANTENER
+
+    def decidir(self, p):
+        a, q = self.pend >> 6, self.pend & 63
+        if a == 1:
+            self.caja -= q * p + 5; self.acc += q
+        elif a == 2:
+            self.caja += q * p - 5; self.acc -= q
+        listo = self.s.push(p)
+        sg = 0
+        if self.k and listo:
+            x, bnd = self.s.N * p, self.s.N * self.U
+            sg = 1 if x + bnd < self.s.suma else (-1 if x > self.s.suma + bnd else 0)
+        r = min(max(self.b - p + self.k * sg, 0), self.D)
+        re, De = (r, self.D) if self.e == 1 else (r * r, self.D * self.D)
+        V, qp = self.acc * p, self.q * p
+        tw = re * (self.caja + V)
+        if self.caja >= qp + 5 and tw >= De * (V + qp):
+            self.pend = COMPRAR | self.q
+        elif self.acc >= self.q and tw <= De * (V - qp):
+            self.pend = VENDER | self.q
+        else:
+            self.pend = MANTENER
+        return self.pend

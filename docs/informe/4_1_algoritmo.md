@@ -41,7 +41,7 @@ Los parámetros se eligen **solo** con 24 sintéticas (*ajuste*) y se confirman 
 un grupo de rivales a los que se supera (comprar y mantener, no operar, V0, V1, momentum 8/64 y nivel
 lineal).
 
-Se probaron 598 configuraciones de 9 familias en tres rondas (285 + 183 + 130):
+Se probaron 598 configuraciones de 9 familias en tres rondas (285 + 183 + 130), más una cuarta de robustez (sección siguiente):
 
 - reversión a la media;
 - momentum;
@@ -137,5 +137,62 @@ estaba poco invertido mientras comprar y mantener sube con todo. Es su peor caso
 en las sintéticas. Probamos agregarle una componente de tendencia (media de 256 o 1.024 ticks), y
 mejoró ese peor caso pero empeoró el resto en el set de prueba, así que no la incluimos.
 
-**Riesgo declarado.** V2 usa que el rango de cada ronda es 100–255. Si el curso decidiera que no se
-puede usar ese dato, el respaldo es V1 (`sw/trade_v1.s`, validado igual).
+## Robustez frente a otras formas de serie
+
+La serie de la competencia no es la de práctica. Por eso hicimos una cuarta ronda
+(`BANCO_RONDA=4 python3 ref/banco.py`, `docs/informe/datos/banco_ronda4.*`) con **64 escenarios**
+de 8 familias, 8 series por familia (`ref/series.py`, función `escenarios`):
+
+- rango lateral;
+- tendencia al alza;
+- tendencia a la baja;
+- V;
+- V invertida;
+- salto inicial y luego lateral (como la serie de Netflix que mostró la maestra en la práctica);
+- caída brusca y rebote;
+- escalones por saltos de apertura grandes.
+
+Todos tienen la misma microestructura que las reales y están normalizados a 100–255. Agregamos V2
+al grupo de rivales y probamos 106 variantes híbridas:
+
+- V2 con lotes de 10 a 40;
+- exposición lineal o cuadrática;
+- una capa de reversión a la media que desplaza el nivel efectivo k unidades según el precio esté
+  bajo o sobre su media móvil.
+
+El orden combina el puntaje promedio y el de la **peor familia**.
+
+| Configuración | Rango | Alza | Baja | V | V inv. | Salto inicial | Caída y rebote | Escalones | Reales |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **V2** (q = 40, cuadrática) | 0,86 | 0,73 | 0,88 | 0,93 | 0,82 | 0,86 | 0,91 | 0,86 | 0,77 |
+| V2 + reversión (k = 10, SMA16, U = 3) | 0,80 | 0,65 | 0,80 | 0,86 | 0,73 | 0,79 | 0,86 | 0,83 | 0,71 |
+| V2 lineal | 0,66 | 0,79 | 0,70 | 0,77 | 0,77 | 0,89 | 0,75 | 0,83 | 0,71 |
+| V1 | 0,41 | 0,50 | 0,48 | 0,25 | 0,54 | 0,32 | 0,18 | 0,54 | 0,75 |
+
+**V2 fue la más robusta de las 106:** ninguna familia baja de 0,73. En los escenarios de prueba le
+gana a comprar y mantener en el 91 % de las series. Su punto más débil sigue siendo la tendencia al
+alza. Ninguna capa de reversión la mejoró: en series reales, la reversión de pocos ticks agrega
+comisiones sin ganancia clara. V1 queda en el puesto 97 de 106, porque solo funciona en las series
+reales de práctica.
+
+**¿Y si una serie no toca 100 y 255?** V2 supone que cada ronda recorre todo el rango, como dice
+el anuncio del curso ("normalizados de la misma forma") y como pasa en Meta y en el Netflix de la
+práctica. Para medir el riesgo, re-normalizamos las 120 series a rangos más chicos
+(`resumen_algoritmo.txt`, sección 4):
+
+| Rango de la serie | V2 gana a comprar y mantener | V2 exceso mediano | V1 gana | V1 exceso mediano |
+|---|---:|---:|---:|---:|
+| 100–255 (el del curso) | 103/120 | 4.150 | 44/120 | −1.616 |
+| 110–245 | 76/120 | 1.427 | 50/120 | −652 |
+| 130–220 | 79/120 | 1.360 | 48/120 | −812 |
+| 100–200 | 90/120 | 1.816 | 48/120 | −875 |
+| 155–255 | 54/120 | −343 | 49/120 | −524 |
+| 140–180 | 54/120 | −158 | 60/120 | 14 |
+
+V2 pierde ventaja si el rango se achica, sobre todo si la serie vive solo en la mitad alta. Aun así
+queda por encima de V1 en todos los casos menos uno: en una franja angosta (140–180), V1 queda apenas
+mejor (60 contra 54 series ganadas). Como no se puede saber de antemano en qué escenario se cae,
+cambiar de algoritmo no compensa.
+
+**Riesgo declarado.** V2 usa que el rango de cada ronda es 100–255, un dato publicado por el curso.
+Si el curso decidiera que no se puede usar, el respaldo es V1 (`sw/trade_v1.s`, validado igual).
