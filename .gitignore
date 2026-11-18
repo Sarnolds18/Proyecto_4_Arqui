@@ -23,4 +23,8 @@ sim/sim
 # Proyecto 4: la serie de practica se versiona (el testbench la lee);
 # las salidas de simulacion no
 !tb/practica.csv
+!tb/practica_meta.csv
+# evidencia del informe (mediciones y logs)
+!docs/**/*.csv
+!docs/**/*.log
 sim/build/

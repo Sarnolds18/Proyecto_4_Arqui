@@ -7,6 +7,20 @@
 > está aquí: sigue en [`Sarnolds18/Proyecto_2_Arqui`](https://github.com/Sarnolds18/Proyecto_2_Arqui),
 > rama `proyecto2` (tag `p2-entrega`), y en el historial de este repo hasta `bb042a1`.
 
+### Proyecto 4 en una página
+
+| Qué | Dónde |
+|---|---|
+| Algoritmo final **V2** (exposición por nivel de precio, cuadrática en 100–255, órdenes de 40) | `ref/trader.py` (clase `V2`), `sw/trade.s` |
+| Respaldo V1 (reversión a la media) y v0 del kit | `sw/trade_v1.s`, `sw/trade_v0.s` |
+| Exploración y elección del algoritmo | `ref/banco.py`, `ref/estrategias.py`, `ref/series.py`, `docs/informe/datos/` |
+| Mediciones por tick (IC, ciclos, CPI) | `make medir`, `sim/sonda_p4.sv`, `ref/mediciones.py`, `docs/mediciones/` |
+| Variantes de hardware (LC, BRAM, fmax) | `docs/variantes/medir_variantes.sh`, `docs/variantes/variantes.txt` |
+| Informe | `docs/informe/4_*.md` → `bash scripts/informe.sh` → `Informe_proyecto4.pdf` |
+
+Validación de V2: `make tb_p4 NTICKS=20000 && python3 ref/trader.py -n 20000 --compara decisiones.csv`
+(4/4 PASS e IGUALES en los 20.000 ticks de la serie Meta; log en `docs/mediciones/v2_20000.log`).
+
 > Meet Pochoco SoC and Espino Core. Inspired by the native flora of the Pochoco trails, it is an entry-level, highly efficient architecture designed to flourish in resource-constrained environments.
 
 ![Pochoco SoC Architecture](pochoco_soc.svg)
@@ -32,34 +46,41 @@ The SoC routes memory and data requests using a hardcoded address decoding schem
   * `Offset 0x00`: 7-Segment Displays
   * `Offset 0x04`: LEDs
   * `Offset 0x08`: Button Inputs (read-only)
-  * `Offset 0x0C`: Cycle Counter — free-running 32-bit counter, increments every
-    clock cycle from reset. Reading it returns the current count; writing any
-    value to it reloads the counter to that value (write 0 to restart it from a
-    known point, e.g. at the start of a timing window).
+  * `Offset 0x0C`: Cycle Counter (Proyecto 2). **Desactivado por defecto en el Proyecto 4**
+    (parámetro `CYCLE_COUNTER = 0` de `pochoco_periph`, lee 0): ningún programa lo usa y sin
+    sacarlo el SoC actual no cabe en la HX1K (`docs/variantes/variantes.txt`, `con_contador`).
+    Con `CYCLE_COUNTER = 1` es un contador libre de 32 bits que se recarga al escribirlo.
 * **`0x8001_0000` - SPI Slave**: Custom SPI interface routing.
   * `Offset 0x00`: SPI Status (Chip Select state, New Data flag)
   * `Offset 0x04`: Received "Price" byte (from external master)
   * `Offset 0x08`: "Decision" byte (written by CPU to transmit)
+  * `Offset 0x0C`: suma de los últimos 16 precios (solo con la macro `SOC_SMA`, alternativa B)
+* **`0x8002_0000` - Multiplicador** (solo con la macro `SOC_MUL`, alternativa D): `+0` A, `+4` B
+  (arranca), `+8` P = A·B, `+C` ocupado.
 
 Dive into the source code to see exactly how these components and connections are built under the hood!
 
 ## Proyecto 4: testbench del curso
 
-`tb/tb_proyecto_4.sv` emula a la FPGA maestra: envía la serie `tb/practica.csv` por
-SPI, lee el byte `DECISION` y lleva la contabilidad. Ambos archivos son **copias
-exactas de los entregados por el curso y no se editan**.
+`tb/tb_proyecto_4.sv` emula a la FPGA maestra: envía una serie de precios por SPI, lee
+el byte `DECISION` y lleva la contabilidad. La serie de práctica vigente es
+`tb/practica_meta.csv` (Meta, feb–may 2022, 20.000 ticks, precios de 100 a 255), que
+reemplaza a `tb/practica.csv` (se conserva para comparar). El testbench y las series son
+**copias exactas de los entregados por el curso y no se editan**.
 
 ```bash
 make tb_p4                         # ronda 3 (T = 0,1 ms), 2000 ticks, sw/trade.hex
 make tb_p4 RONDA=1 NTICKS=50       # ronda 1 (10 ms) o 2 (1 ms), otro largo
 make tb_p4 PROG=sw/echo.hex        # otro programa (se ensambla su .s con sw/assembler.py)
-make tb_p4 NTICKS=20000            # serie completa (~40 min en ronda 3)
+make tb_p4 NTICKS=20000            # serie completa (~75 min en ronda 3)
+make tb_p4 SERIE=tb/practica.csv   # serie de práctica anterior
 ```
 
 El target genera `sim/build/tb_proyecto_4.sv`, una copia del original donde solo
 cambian los valores del bloque *"Configuración: pueden cambiar estos valores"*
-(`PROGRAMA`, `PERIODO_NS`, `NTICKS`), y lo corre desde la raíz del repo. El detalle por
-tick queda en `decisiones.csv`. Referencia: 2000 ticks de la ronda 3 tardan ~4 min.
+(`PROGRAMA`, `SERIE`, `PERIODO_NS`, `NTICKS`), y lo corre desde la raíz del repo. El
+detalle por tick queda en `decisiones.csv`. Referencia: 2000 ticks de la ronda 3 tardan
+entre 4 y 8 min, según la máquina.
 
 **Requiere Icarus Verilog ≥ 13.** Con Icarus 12, el paquete de Ubuntu, el testbench no
 compila (`$fgets's first argument must be a reg`), porque esa versión no acepta un
@@ -91,18 +112,91 @@ mismas referencias) y define las estrategias en aritmética entera exacta, para 
 `sw/trade.s` tome **exactamente las mismas decisiones**. Solo usa la biblioteca estándar.
 
 ```bash
-python3 ref/trader.py                          # estrategia v0, 2000 ticks, ronda 3
-python3 ref/trader.py -e v0 -n 20000 -u 3      # serie completa, otro umbral
+python3 ref/trader.py                          # estrategia v2 (final), 2000 ticks, ronda 3
+python3 ref/trader.py -e v0 -n 20000 -u 3      # otra estrategia, serie completa, otro umbral (v0/v1)
 python3 ref/trader.py -e echo                  # DECISION = precio (prueba de protocolo)
 make tb_p4 && python3 ref/trader.py --compara decisiones.csv   # trade.s vs referencia
 ```
 
-Para `--compara`, usar la misma ronda (`-r`) y el mismo número de ticks (`-n`) que en
-`make tb_p4`. Detalle del testbench que la referencia modela: el reset de encendido de
+Para `--compara`, usar la misma ronda (`-r`), el mismo número de ticks (`-n`) y la misma
+serie (`-s`, por defecto `tb/practica_meta.csv`, igual que `make tb_p4`).
+
+Detalle del testbench que la referencia modela: el reset de encendido de
 `pochoco_soc` dura 2^12 ciclos (163,84 µs) y también resetea al esclavo SPI, así que
 los primeros precios llegan antes de que el programa arranque y se pierden (2 en la
 ronda 3, 1 en las rondas 1 y 2). En la placa real no pasa, porque la Go Board ya está
 configurada cuando parte la maestra.
+
+## Proyecto 4: algoritmo y exploración
+
+```bash
+python3 ref/trader.py -n 20000                 # V2 en la serie Meta + referencias (no operar, comprar y mantener)
+python3 ref/trader.py -e v1 -n 20000           # otra estrategia: mantener, echo, v0, v1, v2
+python3 ref/series.py                          # estadísticas de las series reales y sintéticas
+python3 ref/banco.py                           # banco de evaluación (56 series x 20.000 ticks, ~10 min, 12 núcleos)
+BANCO_RONDA=3 python3 ref/banco.py             # ronda 3 (versión exacta de V2 y vecinas)
+python3 ref/resumen_algoritmo.py               # tablas del informe 4.1
+python3 ref/graficos.py                        # figuras de docs/informe/fig/ (necesita matplotlib)
+```
+
+## Proyecto 4: testbenches y mediciones
+
+| Comando | Qué prueba |
+|---|---|
+| `make tb_p4 [RONDA=1/2/3] [NTICKS=…] [PROG=…] [SERIE=…] [DEFS=…]` | testbench del curso (4 chequeos) |
+| `python3 ref/trader.py [-e …] -n … [-s …] --compara decisiones.csv` | mismas decisiones que la referencia, tick a tick |
+| `make medir NOMBRE=… [mismas variables]` | tb del curso + `sim/sonda_p4.sv`: CSV por tick en `docs/mediciones/` |
+| `python3 ref/mediciones.py v2_20000:sw/trade.s …` | IC, ciclos, CPI, perfil, Amdahl, Ops/s, roofline |
+| `iverilog -o /tmp/t sim/tb_pochoco_mul.v rtl/pochoco_mul.v && vvp /tmp/t` | multiplicador (alternativa D) |
+| `iverilog -o /tmp/t sim/tb_pochoco_sma.v rtl/pochoco_sma.v && vvp /tmp/t` | suma móvil (alternativa B) |
+| `iverilog -DESPINO_SHIFTER -o /tmp/t sim/tb_espino_alu_shift.v rtl/espino_core/espino_alu.v && vvp /tmp/t` | shifter (alternativa C; también con `-DESPINO_SHIFTER_FULL`) |
+| `iverilog -g2012 -o /tmp/t $(yosys-config --datdir)/ice40/cells_sim.v rtl/*.v rtl/espino_core/*.v sim/tb_reset_boton.v && vvp /tmp/t` | botón de reset |
+| `iverilog -o /tmp/t sim/tb_pochoco_periph.v rtl/pochoco_periph.v rtl/debouncer.v && vvp /tmp/t` | periféricos (Proyecto 2) |
+| `bash sim/postsintesis_ram.sh sw/trade_mul.hex 500 SOC_MUL docs/mediciones/estres_serie.csv` | RAM con `RAM_NO_RW_CHECK` después de la síntesis |
+
+`docs/mediciones/estres_serie.csv` (`python3 ref/series.py --estres …`) es una serie artificial que
+hace operar a V2 cientos de veces; sirve solo para validar `trade.s`.
+
+## Proyecto 4: variantes de hardware
+
+Se eligen con macros de Verilog (`DEFS`), iguales para yosys y para Icarus; sin macros se arma el
+diseño final.
+
+| Macro | Qué hace | Programa |
+|---|---|---|
+| (ninguna) | **diseño final**: SoC sin contador de ciclos, con botón de reset | `sw/trade.s` (V2) |
+| `SOC_MUL` | D: multiplicador secuencial en `0x8002_0000` | `sw/trade_mul.s` (V2) |
+| `SOC_SMA` | B: suma móvil de 16 precios en el esclavo SPI | `sw/trade_sma.s` (V1) |
+| `ESPINO_SHIFTER` / `ESPINO_SHIFTER_FULL` | C: SLL, o SLL/SRL/SRA, en la ALU | `sw/trade_shift.s` (V1) |
+| `RAM_NO_RW_CHECK` | RAM sin emulación de colisiones (−150 LC aprox.) | cualquiera |
+| `SOC_PLL` | A: PLL a 37,5 MHz. **No se puede colocar en la HX1K VQ100** (`docs/variantes/pll_vq100/`) | — |
+
+```bash
+make DEFS="SOC_MUL RAM_NO_RW_CHECK" TRADE_HEX=sw/trade_mul.hex trade_top.bin   # una variante
+bash docs/variantes/medir_variantes.sh                                        # tabla de todas
+```
+
+Ojo: `trade_top.json` no se rehace solo si cambia `DEFS`. Antes de armar otra variante, hacer
+`make clean`.
+
+**Botón de reset:** el botón SW1 (`i_Switch[0]`, pin 53) repite el reset de encendido (164 µs):
+reinicia el core, el esclavo SPI (DECISION = 0) y los periféricos, y `trade.s` parte de cero. Sirve
+para empezar cada ronda desde cero.
+
+## Proyecto 4: versiones de las herramientas
+
+| Herramienta | Versión | Uso |
+|---|---|---|
+| Yosys | 0.33 (Ubuntu 24.04) | síntesis de `make` y de `docs/variantes/` |
+| nextpnr-ice40 | 0.6 (Ubuntu) | place & route |
+| icestorm (icepack, iceprog) | 0~20230218gitd20a5e9 (Ubuntu) | bitstream y programación |
+| Icarus Verilog | 13.0 devel (`nix-shell` de LibreLane); 12.0 alcanza para los tb de módulos | testbenches |
+| Yosys (nix-shell de LibreLane) | 0.62 | `yosys-config` y `cells_sim.v` dentro del nix-shell, `sim/postsintesis_ram.sh` |
+| Python | 3.12.3 (+ matplotlib solo para `ref/graficos.py`) | referencia, banco, análisis |
+| pandoc / typst | 3.7.0.2 / 0.15.1 (nixpkgs fijado en `scripts/informe.sh`) | PDF del informe |
+
+Con oss-cad-suite (Yosys 0.69, nextpnr 0.11.1) los LC cambian en unos pocos (1.270 vs 1.275 en la
+base del Proyecto 2): el place & route depende de la versión.
 
 ## How to Build
 

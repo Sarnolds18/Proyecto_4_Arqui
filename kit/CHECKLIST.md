@@ -1,14 +1,15 @@
-# Kit para la prueba con la FPGA maestra
+# Kit para la FPGA maestra (prueba de conexión y competencia)
 
 Dos bitstreams, los dos con el mismo SoC (`pochoco_soc`) y distinto programa en la RAM:
 
 | Bitstream | Programa | Qué hace | Para qué sirve |
 |---|---|---|---|
 | `echo.bin` | `sw/echo.s` | Por cada precio: `DECISION = precio` y lo muestra en el 7-seg | Revisar cables, modo SPI y orden de bits |
-| `trade_top.bin` | `sw/trade.s` (v0) | Reversión a la media de 16 precios, umbral 2, órdenes de 63 | Ver compras y ventas reales en la pantalla de la maestra |
+| `trade_top.bin` | `sw/trade.s` (**V2, final**) | Exposición por nivel de precio: compra de a 40 acciones cuando el precio baja, vende de a 40 cuando sube | La competencia |
 
-Validación en simulación (testbench del curso, ronda 3, 2.000 ticks, commit `0786599`):
-los dos dan **4/4 PASS** y **IGUALES** con `ref/trader.py`.
+Validación en simulación (testbench del curso, ronda 3): `trade.s` (V2) da **4/4 PASS** e
+**IGUALES** con `ref/trader.py` en los 20.000 ticks de la serie Meta (`docs/mediciones/v2_20000.log`);
+`echo.s` da 4/4 PASS e IGUALES (500 ticks). Peor tick de V2: 779 ciclos de 2.262 (34 %).
 
 ## Generar los bitstreams (desde la raíz del repo)
 
@@ -18,8 +19,9 @@ make trade_top.bin      # sw/trade.hex -> trade_top.bin (no flashea)
 make echo.bin           # sw/echo.hex  -> echo.bin
 ```
 
-Las dos salidas tienen que decir `PASS at 25.00 MHz` y ~1.260–1.275/1.280 LC. Los `.bin`
-no se versionan (`.gitignore`): se regeneran desde el repo.
+Las dos salidas tienen que decir `PASS at 25.00 MHz` (trade_top: ~1.183/1.280 LC; echo: ~1.108).
+Los `.bin` no se versionan (`.gitignore`): se regeneran desde el repo. Si antes se armó una
+variante con `DEFS=...`, hacer `make clean` primero.
 
 Flashear: `iceprog echo.bin` o `iceprog trade_top.bin`. Desde WSL, antes hay que conectar
 la placa con `usbipd attach` (ver README, "Flashing from WSL").
@@ -32,8 +34,8 @@ la placa con `usbipd attach` (ver README, "Flashing from WSL").
 - [ ] 5 cables dupont: SCLK, MOSI, CS_n, MISO **y GND** (la tierra común es obligatoria)
 - [ ] El notebook de Lucas con `iceprog` probado el mar 17, y `echo.bin` y `trade_top.bin`
       ya generados
-- [ ] Respaldo: el notebook de Santiago. Con su toolchain los dos bitstreams compilan
-      (Yosys 0.33, nextpnr 0.6, 1.270 y 1.256 LC); para flashear desde WSL hace falta
+- [ ] Respaldo: el notebook de Santiago (también tiene Go Board). Con su toolchain los dos
+      bitstreams compilan (Yosys 0.33, nextpnr 0.6); para flashear desde WSL hace falta
       `usbipd`.
 - [ ] Este checklist
 
@@ -54,22 +56,30 @@ Confirmar contra el conector de la maestra antes de enchufar. Las dos placas tra
 1. **Flashear `echo.bin`** antes de conectar los cables de señal.
    - Al recibir precios, el 7-seg debe cambiar en cada tick.
    - ⚠️ **El 7-seg muestra el precio en hexadecimal.** Para pasarlo a decimal: 16 × primer
-     dígito + segundo dígito. Por ejemplo, `97` = 151, `48` = 72, `BE` = 190.
+     dígito + segundo dígito. Por ejemplo, `64` = 100, `A5` = 165, `FF` = 255.
    - Si no cambia: revisar GND, CS_n y SCLK.
 2. **Revisar el byte que recibe la maestra** (pedir que lo muestre). En el tick n tiene que
    ser **el precio del tick n−1**, porque el byte sale al comenzar la transacción.
    - Si sale el mismo número pero desplazado un bit, o con los bits al revés: es un problema
      de modo SPI (tiene que ser modo 0) o de orden de bits (MSB primero).
    - Si sale siempre `0x00`: revisar MISO (pin 63).
+   - **Si sale bien salvo el bit 7** (precios ≥ 128 llegan como precio − 128): la maestra da
+     el primer flanco de SCLK muy pronto. El esclavo carga el bit 7 en MISO ~3 ciclos
+     (~120 ns) después de que baja CS_n. Preguntar el tiempo entre CS_n y el primer flanco.
    - Con echo, la maestra va a ejecutar compras y ventas "al azar" (los bits [7:6] del precio).
-     Es esperado.
-3. **Flashear `trade_top.bin`.**
-   - Durante los primeros 16 ticks solo mantiene (`0x00`): está llenando la media.
-   - Después manda `0x7F` (comprar 63) cuando el precio está más de 2 bajo la media, y `0xBF`
-     (vender 63) cuando está más de 2 sobre la media. Nunca tiene más de 63 acciones.
-   - En la pantalla de la maestra deberían verse compras y ventas, y el patrimonio cambiando.
-   - El 7-seg también muestra el precio en hexadecimal.
-4. **Anotar todo** (va al informe; fotos de la pantalla):
+     Es esperado. Con precios de 100 a 255 (serie Meta): de 100 a 127 compra, de 128 a 191
+     vende y de 192 a 255 mantiene (bits `11`).
+3. **Flashear `trade_top.bin`** (V2).
+   - Manda `0x68` (comprar 40) o `0xA8` (vender 40), y si no, `0x00`. **Opera poco**: unas 5
+     órdenes en 20.000 ticks en la serie de práctica. Que pasen cientos de ticks sin órdenes es
+     normal.
+   - Compra cuando el precio baja (más fuerte cerca de 100) y vende cuando sube (cerca de 255 queda
+     sin acciones). Arranca en caja: con el precio en la mitad del rango puede no comprar al
+     principio.
+   - El 7-seg muestra el precio en hexadecimal.
+4. **Antes de cada ronda: apretar SW1 (reset).** Reinicia el programa (caja 10.000, 0 acciones)
+   en 164 µs, igual que la maestra al empezar la ronda. No hace falta volver a flashear.
+5. **Anotar todo** (va al informe; fotos de la pantalla):
    - [ ] frecuencia real de SCLK
    - [ ] período T que usaron y duración de una transacción
    - [ ] si CS_n baja una vez por tick
@@ -78,10 +88,8 @@ Confirmar contra el conector de la maestra antes de enchufar. Las dos placas tra
 
 ## Preguntar
 
-- [ ] **¿Se resetea la placa entre rondas?** ¿Cómo empieza cada ronda? Nuestro SoC no tiene
-      reset externo: el reset de encendido solo actúa al configurar la FPGA. Sin reset,
-      `trade.s` arrastra su media y su posición (0/1) de una ronda a la siguiente. Si hay que
-      reiniciar: ¿se re-flashea, se desenchufa o se puede usar un botón? (Esto decide si se
-      mantienen los botones en L2; ver `docs/luts.md`.)
+- [x] Reset entre rondas: sí (confirmado). Lo hacemos con **SW1** (botón de reset, ver paso 4).
+- [ ] ¿Se puede usar que cada ronda está normalizada a 100–255? V2 se basa en eso. Respaldo si no:
+      `make clean && make TRADE_HEX=sw/trade_v1.hex trade_top.bin` (V1).
 - [ ] ¿La competencia del 24/11 usa el mismo conector y los mismos pines?
-- [ ] ¿Las 3 rondas van seguidas? ¿Cuántos ticks tiene cada una?
+- [x] 20.000 ticks por ronda (confirmado). ¿Las 3 rondas van seguidas?
