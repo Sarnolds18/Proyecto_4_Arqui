@@ -1,43 +1,51 @@
 # Proyecto 4 - Pochoco Trader
 #
-# trade.s v0: reversion a la media sobre la media movil de los ultimos
-# N = 16 precios, umbral U = 2, ordenes de 63 acciones. Implementa
-# exactamente la clase V0 de ref/trader.py (solo sumas, restas y
-# comparaciones: Espino no tiene shifts, mul ni div).
+# trade.s V2 (version final, solo software): exposicion por nivel de precio.
+# Implementa exactamente la clase V2 de ref/trader.py.
+#
+# Cada ronda se normaliza a 100..255: cerca de 100 el precio casi no puede
+# bajar mas y cerca de 255 casi no puede subir. La fraccion del patrimonio en
+# acciones apunta a (r/D)^2, con r = 255 - p y D = 155, y se mueve con
+# ordenes de q = 40 acciones:
 #
 #   por cada precio p:
-#     suma += p - buf[idx]; buf[idx] = p; idx = (idx + 1) & 15
-#     si llenos < 16: llenos += 1; si llenos < 16: MANTENER
-#     x = 16 * p
-#     si pos == 0 y x + 16*U < suma:  COMPRAR | 63 (0x7F), pos = 1
-#     si pos == 1 y x > suma + 16*U:  VENDER  | 63 (0xBF), pos = 0
-#     si no: MANTENER (0x00)
+#     DECISION = MANTENER
+#     aplicar la orden anterior al precio p (se ejecuta a este precio):
+#       comprar: caja -= 40p + 5, acc += 40;  vender: caja += 40p - 5, acc -= 40
+#     r = min(255 - p, 155); V = acc*p; W = caja + V; qp = 40p
+#     si caja >= qp + 5 y r*r*W >= 155^2 * (V + qp):  COMPRAR | 40 (0x68)
+#     si no, si acc >= 40 y r*r*W <= 155^2 * (V - qp): VENDER  | 40 (0xA8)
 #
-# Durante el calentamiento buf[] esta en cero, asi que "suma += p - buf[idx]"
-# equivale a "suma += p" y el puntero idx da la vuelta a 0 justo cuando
-# llenos llega a 16 (igual que la referencia).
+# Las ordenes nunca piden mas caja ni mas acciones de las que hay, asi que la
+# maestra no las recorta y la copia de caja/acciones es exacta.
 #
-# DECISION = 0 se escribe apenas se lee el precio: si el calculo no alcanzara
-# a terminar antes del siguiente tick, la maestra recibe "mantener" y no una
-# orden vieja.
+# Sin mul/div/shift: 40p con sumas (32p + 8p) y los productos de variables
+# con la subrutina mul (suma y doble, un bit del multiplicador por vuelta).
+# No hay division: la exposicion se compara escalada (r^2 * W vs D^2 * V).
+# Los productos se comparan sin signo: no desbordan mientras W < ~170.000
+# (validado con la serie de estres, que llega a W = 122.522).
 #
 # Validacion:
 #   make tb_p4 && python3 ref/trader.py --compara decisiones.csv
 #
-# Registros:
+# Registros (RV32E: x0..x15):
 #   x1  = 0x8001_0000  esclavo SPI (+0 STATUS, +4 PRICE, +8 DECISION)
-#   x2  = 0x8000_0000  perifericos (+0 7 segmentos)
-#   x3  = temporal
-#   x4  = p (precio actual)
-#   x5  = suma de los ultimos 16 precios
-#   x6  = llenos (0..16)
-#   x7  = idx en bytes (0, 4, ..., 60)
-#   x8  = posicion (0 = en caja, 1 = comprado)
-#   x9  = base de buf[] en RAM (0x700, fuera del programa)
-#   x10 = 16 * p
-#   x11 = temporal
-#   x12 = 16 (N)
-#   x13 = 32 (banda = 16 * U)
+#   x2  = 0x8000_0000  perifericos (+0 7 segmentos, +4 LEDs)
+#   x3  = temporal / resultado de mul
+#   x4  = p
+#   x5  = caja
+#   x6  = acc (acciones)
+#   x7  = decision pendiente (la que se escribio en el tick anterior)
+#   x8  = r, despues r*r*W
+#   x9  = V = acc * p
+#   x10 = mascara de mul
+#   x11 = qp = 40 * p
+#   x12 = temporal de mul
+#   x13 = multiplicando de mul (se destruye)
+#   x14 = multiplicador de mul
+#   x15 = direccion de retorno de mul
+#
+# Memoria: ninguna (todo el estado en registros). Sin pila.
 
 .section .text
 .global _start
@@ -45,66 +53,106 @@
 _start:
     lui  x1, 0x80010            # x1 = base SPI
     lui  x2, 0x80000            # x2 = base perifericos
-    addi x5, x0, 0              # suma = 0
-    addi x6, x0, 0              # llenos = 0
-    addi x7, x0, 0              # idx = 0
-    addi x8, x0, 0              # posicion = 0
-    addi x9, x0, 0x700          # buf en 0x700..0x73F
-    addi x12, x0, 16            # N
-    addi x13, x0, 32            # banda = 16 * U, U = 2
-
-    # buf[0..15] = 0 (la RAM fuera del programa parte indefinida)
-    addi x3, x9, 0
-    addi x11, x9, 64
-limpia:
-    sw   x0, 0(x3)
-    addi x3, x3, 4
-    bne  x3, x11, limpia
+    lui  x5, 2                  # caja = 8192 + 1808 = 10000
+    addi x5, x5, 1808
+    addi x6, x0, 0              # acc = 0
+    addi x7, x0, 0              # pendiente = MANTENER
 
 espera:
     lw   x3, 0(x1)              # STATUS: bit0 = precio nuevo
     andi x3, x3, 1
     beq  x3, x0, espera
 
+lee:
     lw   x4, 4(x1)              # p = PRICE (leerlo limpia el bit)
     sw   x0, 8(x1)              # DECISION = MANTENER de inmediato
     sw   x4, 0(x2)              # 7 segmentos: precio en hex
 
-    # ventana movil: suma += p - buf[idx]; buf[idx] = p; idx = (idx+1) & 15
-    add  x11, x9, x7            # &buf[idx]
-    lw   x3, 0(x11)             # precio que sale
-    sub  x5, x5, x3
-    add  x5, x5, x4
-    sw   x4, 0(x11)
-    addi x7, x7, 4
-    andi x7, x7, 63
+cuenta:
+    # qp = 40p = 32p + 8p
+    add  x11, x4, x4            # 2p
+    add  x11, x11, x11          # 4p
+    add  x11, x11, x11          # 8p
+    add  x3, x11, x11           # 16p
+    add  x3, x3, x3             # 32p
+    add  x11, x11, x3           # 40p
 
-    # calentamiento: hasta tener 16 precios no se decide
-    beq  x6, x12, decide        # llenos == 16: ventana llena
-    addi x6, x6, 1
-    bne  x6, x12, espera        # llenos < 16: MANTENER (ya escrito)
+    # la orden pendiente se ejecuto a este precio: actualizar la copia
+    addi x3, x0, 0x68           # COMPRAR | 40
+    bne  x7, x3, no_compro
+    sub  x5, x5, x11            # caja -= 40p + 5
+    addi x5, x5, -5
+    addi x6, x6, 40             # acc += 40
+    jal  x0, nivel
+no_compro:
+    addi x3, x0, 0xA8           # VENDER | 40
+    bne  x7, x3, nivel
+    add  x5, x5, x11            # caja += 40p - 5
+    addi x5, x5, -5
+    addi x6, x6, -40            # acc -= 40
+
+nivel:
+    addi x7, x0, 0              # pendiente = MANTENER salvo que se decida otra cosa
+    addi x8, x0, 255
+    sub  x8, x8, x4             # r = 255 - p (p <= 255)
+    addi x3, x0, 155
+    bge  x3, x8, r_ok           # r <= 155
+    addi x8, x0, 155            # p < 100: r = D
+r_ok:
+    addi x13, x4, 0             # V = p * acc
+    addi x14, x6, 0
+    jal  x15, mul
+    addi x9, x3, 0
+
+    addi x13, x8, 0             # r * r
+    addi x14, x8, 0
+    jal  x15, mul
+
+    addi x14, x3, 0             # r*r * W, W = caja + V
+    add  x13, x5, x9
+    jal  x15, mul
+    addi x8, x3, 0              # x8 = r*r*W
 
 decide:
-    add  x10, x4, x4            # 2p
-    add  x10, x10, x10          # 4p
-    add  x10, x10, x10          # 8p
-    add  x10, x10, x10          # 16p
+    # comprar si caja >= qp + 5 y r*r*W >= D^2 * (V + qp)
+    addi x3, x11, 5
+    blt  x5, x3, prueba_venta
+    lui  x13, 6                 # D^2 = 24025 = 24576 - 551
+    addi x13, x13, -551
+    add  x14, x9, x11           # V + qp
+    jal  x15, mul
+    bltu x8, x3, prueba_venta
+    addi x7, x0, 0x68           # COMPRAR | 40
+    jal  x0, escribe
 
-    bne  x8, x0, en_bolsa
+prueba_venta:
+    # vender si acc >= 40 y r*r*W <= D^2 * (V - qp)
+    addi x3, x0, 40
+    blt  x6, x3, espera         # sin 40 acciones: MANTENER (ya escrito)
+    lui  x13, 6                 # D^2
+    addi x13, x13, -551
+    sub  x14, x9, x11           # V - qp (>= 0 porque acc >= 40)
+    jal  x15, mul
+    bltu x3, x8, espera         # D^2 * (V - qp) < r*r*W: MANTENER
+    addi x7, x0, 0xA8           # VENDER | 40
 
-    # en caja: comprar si 16p + banda < suma
-    add  x3, x10, x13
-    bge  x3, x5, espera         # no: MANTENER
-    addi x3, x0, 0x7F           # COMPRAR | 63
-    sw   x3, 8(x1)
-    addi x8, x0, 1
+escribe:
+    sw   x7, 8(x1)              # DECISION
     jal  x0, espera
 
-en_bolsa:
-    # comprado: vender si 16p > suma + banda
-    add  x3, x5, x13
-    bge  x3, x10, espera        # no: MANTENER
-    addi x3, x0, 0xBF           # VENDER | 63
-    sw   x3, 8(x1)
-    addi x8, x0, 0
-    jal  x0, espera
+# x3 = x13 * x14 (sin signo). Un bit de x14 por vuelta, de menor a mayor:
+# termina cuando la mascara supera a x14. Usa x10 y x12; destruye x13.
+mul:
+    addi x3, x0, 0
+    addi x10, x0, 1             # mascara
+mul_l:
+    bltu x14, x10, mul_fin      # mascara > multiplicador: listo
+    and  x12, x14, x10
+    beq  x12, x0, mul_s
+    add  x3, x3, x13            # bit en 1: sumar el multiplicando desplazado
+mul_s:
+    add  x13, x13, x13          # multiplicando * 2
+    add  x10, x10, x10          # mascara * 2
+    bne  x10, x0, mul_l
+mul_fin:
+    jalr x0, 0(x15)
