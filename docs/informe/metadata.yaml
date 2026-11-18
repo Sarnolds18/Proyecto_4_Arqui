@@ -1,0 +1,62 @@
+---
+lang: es
+papersize: a4
+margin:
+  x: 2cm
+  y: 2.2cm
+fontsize: 10pt
+mainfont: "Libertinus Serif"
+codefont: "DejaVu Sans Mono"
+header-includes: |
+  ```{=typst}
+  // La portada (pagina 1) no lleva numero.
+  #set page(footer: context {
+    if counter(page).get().first() > 1 { align(center, counter(page).display("1")) }
+  })
+  // Tablas: se pueden partir entre paginas, alineadas a la izquierda, con lineas.
+  #show figure: set block(breakable: true)
+  #show figure: set align(left)
+  #set table(stroke: 0.4pt + luma(170), inset: (x: 4pt, y: 3pt))
+  #show table: set text(size: 8.5pt)
+  #show table: set align(left)
+  #show table: set par(justify: false)
+  #show table.cell.where(y: 0): set text(weight: "bold")
+  #show raw: set text(size: 0.9em)
+  // Cada seccion 4.x empieza en una pagina nueva.
+  #show heading.where(level: 1): it => { pagebreak(weak: true); it }
+  ```
+# Portada con el mismo diseno que la del Informe del Proyecto 2.
+include-before: |
+  ```{=typst}
+  #set document(
+    title: "Informe Proyecto 4: Pochoco Trader",
+    author: ("Lucas Nestler", "Santiago Arnolds", "Matías Veto"),
+  )
+  #[
+    #set text(font: "DejaVu Sans", fill: luma(25))
+    #set par(justify: false)
+    #place(top + left, image("fig/logo_uniandes.png", width: 6cm))
+    #place(top + left, dy: 9.3cm)[
+      #text(size: 9pt, tracking: 0.32em, fill: luma(70))[INFORME PROYECTO 4]
+      #v(0.45cm)
+      #text(size: 27pt, hyphenate: false)[Pochoco Trader:\ co-diseño hardware/software]
+      #v(0.55cm)
+      #line(length: 6.4cm, stroke: 1.2pt + luma(25))
+      #v(0.35cm)
+      #text(size: 10pt, fill: luma(70))[
+        Agente de inversión sobre Espino Core en la Go Board (iCE40 HX1K)\
+        Algoritmo, assembly RV32E y aceleración por hardware
+      ]
+    ]
+    #place(bottom + right, dy: -3cm, align(right, text(size: 10pt)[
+      Integrantes: Lucas Nestler, Santiago Arnolds, Matías Veto\
+      Curso: Arquitectura de Computadores, semestre 2026-2\
+      Profesor: Jorge Gómez Mir
+    ]))
+    #place(bottom + left, dy: -0.65cm, text(size: 8.5pt, fill: luma(70))[
+      Entrega en GitHub: 24 de noviembre #h(0.3em) · #h(0.3em) Competencia y defensa: 24 de noviembre
+    ])
+  ]
+  #pagebreak()
+  ```
+---
