@@ -9,7 +9,7 @@ Dos bitstreams, los dos con el mismo SoC (`pochoco_soc`) y distinto programa en 
 
 Validación en simulación (testbench del curso, ronda 3): `trade.s` (V2) da **4/4 PASS** e
 **IGUALES** con `ref/trader.py` en los 20.000 ticks de la serie Meta (`docs/mediciones/v2_20000.log`);
-`echo.s` da 4/4 PASS e IGUALES (500 ticks). Peor tick de V2: 779 ciclos de 2.262 (34 %).
+`echo.s` da 4/4 PASS e IGUALES (500 ticks). Peor tick de V2: 653 ciclos de 2.262 (29 %).
 
 ## Generar los bitstreams (desde la raíz del repo)
 
@@ -77,8 +77,11 @@ Confirmar contra el conector de la maestra antes de enchufar. Las dos placas tra
      sin acciones). Arranca en caja: con el precio en la mitad del rango puede no comprar al
      principio.
    - El 7-seg muestra el precio en hexadecimal.
-4. **Antes de cada ronda: apretar SW1 (reset).** Reinicia el programa (caja 10.000, 0 acciones)
-   en 164 µs, igual que la maestra al empezar la ronda. No hace falta volver a flashear.
+4. **Antes de cada ronda, y cada vez que la maestra reinicia la serie (su botón BTNR): apretar
+   SW1 (reset).** No tocar la placa durante una ronda: un reset a mitad de ronda desincroniza la
+   cuenta del programa con la de la maestra. SW1 reinicia el programa (caja 10.000, 0 acciones)
+   en 164 µs, igual que la maestra al empezar la ronda. No hace falta volver a flashear. Si la
+   maestra solo pausa (BTNC), no hay que hacer nada.
 5. **Anotar todo** (va al informe; fotos de la pantalla):
    - [ ] frecuencia real de SCLK
    - [ ] período T que usaron y duración de una transacción

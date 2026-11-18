@@ -10,18 +10,30 @@ De dónde salen los números:
 ## Dónde se van los ciclos (profiling)
 
 La sonda `sim/sonda_p4.sv` atribuye cada ciclo a la instrucción que está en ID, por PC. Los ciclos
-sin instrucción válida (burbujas tras un salto tomado) se cuentan aparte. Con V2 solo software, en la
-serie de estrés (`docs/mediciones/estres_serie.csv`, que recorre todos los caminos del programa):
+sin instrucción válida (burbujas tras un salto tomado) se cuentan aparte. Todo se mide en la serie
+de estrés (`docs/mediciones/estres_serie.csv`), que recorre todos los caminos del programa.
+
+**Primera versión de V2** (`sw/trade_v2a.s`): la multiplicación se llevaba el **75,9 %** de los
+ciclos, más el 11,3 % de burbujas, casi todas de su bucle. Espino no tiene `mul`: cada producto era
+un bucle de hasta 16 vueltas de 7 instrucciones.
+
+**Primer paso de co-diseño, en software.** Dos de los cuatro productos por tick son por la constante
+D² = 24.025. Los cambiamos por una cadena fija de 24 instrucciones (`mul_d2`, una suma por bit en 1 de la
+constante). El resultado es exactamente el mismo, con mismas decisiones e IGUALES, y el tick
+promedio baja de 727 a 527 ciclos (**1,38×**). El peor caso baja de 1.133 a 721 ciclos.
+
+**V2 final** (`sw/trade.s`):
 
 | Región de `sw/trade.s` | % de los ciclos |
 |---|---:|
-| subrutina `mul` (bucle de suma y doble) | 75,9 % |
-| burbujas tras saltos (en su mayoría, del bucle de `mul`) | 11,3 % |
-| resto: leer el precio, actualizar la cuenta, decidir y escribir | 12,8 % |
+| subrutina `mul` (bucle de suma y doble, productos de dos variables) | 59,7 % |
+| `mul_d2` (producto por D², cadena fija) | 13,7 % |
+| burbujas tras saltos (en su mayoría, del bucle de `mul`) | 10,0 % |
+| resto: leer el precio, actualizar la cuenta, decidir y escribir | 16,6 % |
 
-**La multiplicación es el cuello de botella**: Espino no tiene `mul`, y cada producto cuesta un
-bucle de hasta 16 vueltas de 7 instrucciones. Por Amdahl, si las multiplicaciones fueran gratis el
-tick sería como mucho 1/(1 − p) más rápido. Con p = 0,84 (mul + sus burbujas), ese límite es 6,2×.
+**La multiplicación sigue siendo el cuello de botella**: ~73 % de los ciclos, o ~79 % con las
+burbujas de su bucle. Por Amdahl, si las multiplicaciones fueran gratis, el tick sería como mucho
+1/(1 − 0,79) = **4,8×** más rápido.
 
 En V1, el algoritmo del kit, el reparto es otro:
 
@@ -76,19 +88,22 @@ Operación útil para Ops/s:
 | V1 solo SW | 1.183 | 12 | 38,7 | 54,97 | 72 | 2,32 | 347.222 | 1 | — |
 | V1 + B (suma móvil, nrw) | 1.128 | 13 | 42,6 | 42,86 | 59 | 2,42 | 423.729 | 1,273 | 1,281 |
 | V1 + C (shifter, nrw) | 1.189 | 12 | 41,3 | 49,22 | 66 | 2,36 | 378.788 | 1,112 | 1,114 |
-| **V2 solo SW (final)** | **1.183** | 12 | 38,7 | 727,16 | 1.133 | 2,26 | 22.065 | 1 | — |
-| V2 + D (multiplicador, nrw) | 1.164 | 12 | 36,1 | 231,31 | 286 | 2,47 | 87.413 | 3,144 | 3,144\* |
+| V2a solo SW (`mul` general) | 1.183 | 12 | 38,7 | 727,16 | 1.133 | 2,26 | 22.065 | 1 | — |
+| **V2 solo SW (final, `mul_d2`)** | **1.183** | 12 | 38,7 | 526,99 | 721 | 2,24 | 34.674 | 1,380 vs V2a | — |
+| V2 + D (multiplicador, nrw) | 1.164 | 12 | 36,1 | 231,31 | 286 | 2,47 | 87.413 | 2,278 vs V2 (3,144 vs V2a) | 2,337\* |
 
 Notas:
 
-- Ciclos de V1 y sus variantes: primeros 1.998 ticks de Meta. Ciclos de V2 y D: serie de estrés,
-  1.998 ticks.
-- \* Amdahl con p = 0,840, que suma a `mul` las burbujas propias de su bucle (las del programa SW
-  menos las del programa HW, porque el resto del código es idéntico). Contando solo las instrucciones
-  de `mul` (p = 0,759), predice 2,51.
+- Ciclos de V1 y sus variantes: primeros 1.998 ticks de Meta. Ciclos de V2a, V2 y D: serie de
+  estrés, 1.998 ticks.
+- \* Amdahl de D sobre V2 con p = 0,790: `mul` y `mul_d2` más las burbujas propias del bucle (las
+  del programa SW menos las del programa HW, porque el resto del código es igual) y s = 3,63.
+  Contando solo las instrucciones de las subrutinas (p = 0,734), predice 2,07. Lo medido (2,28) queda
+  entre las dos.
 - "nrw" = `RAM_NO_RW_CHECK`. Sin ese ahorro, B (1.294 LC) y D (1.362 LC) no caben.
 - El multiplicador sube un poco el CPI (más `lw`/`sw` al MMIO, de CPI 3 y 2), pero baja tanto el IC
-  (321 → 94 instrucciones por tick) que el tick se acelera 3,1×.
+  (236 → 94 instrucciones por tick) que el tick se acelera 2,3×.
+- Los LC no dependen del programa: V2a y V2 ocupan lo mismo. Solo cambia el contenido de la BRAM.
 
 ## Roofline
 
@@ -100,13 +115,14 @@ Techos de Espino medidos con el CPI por clase:
 
 | Kernel | Intensidad (ops/B) | Rendimiento (Mops/s) | Límite |
 |---|---:|---:|---|
-| V2 solo SW | 24,5 | 12,0 | cómputo (96 % del techo) |
+| V2 solo SW | 17,6 | 11,8 | cómputo (94 % del techo) |
 | V1 solo SW | 0,70 | 8,8 | cómputo (cerca del quiebre) |
 | V2 + multiplicador | 0,43 | 6,4 | junto al quiebre: domina el acceso al MMIO |
 
 ![Roofline de Espino](fig/3_roofline.png)
 
-V2 solo SW está pegado al techo de cómputo: el bucle de multiplicación es ALU pura. El multiplicador
+V2 solo SW está pegado al techo de cómputo: el bucle de multiplicación y la cadena de `mul_d2` son
+ALU pura. El multiplicador
 saca esas operaciones de Espino. Lo que queda es poco cómputo y bastante acceso al MMIO, así que el
 kernel baja de intensidad, pero hace mucho menos trabajo por tick. El roofline mide qué tan bien usa
 Espino sus recursos, no el tiempo total; el tiempo lo da la tabla anterior.
@@ -114,18 +130,20 @@ Espino sus recursos, no el tiempo total; el tiempo lo da la tabla anterior.
 ## Presupuesto por ronda
 
 A 25 MHz los ciclos disponibles por tick son (T − 9,5 µs) · f: 249.762, 24.762 y **2.262**. El peor
-tick de V2 solo SW en la serie de estrés usa 1.133 ciclos (**50 % de la ronda 3**) y en la serie Meta
-menos (peor tick 779 ciclos, 34 % de la ronda 3; ver 4.2). Cabe en las tres rondas con margen. Además, `trade.s` escribe `DECISION = 0`
+tick de V2 solo SW es de 653 ciclos en Meta (**28,9 % de la ronda 3**) y de 721 en la serie de
+estrés (31,9 %). Cabe en las tres rondas con margen. Además, `trade.s` escribe `DECISION = 0`
 apenas lee el precio: si algún tick no alcanzara, lo que se repite es "mantener".
 
 ## Variante final
 
-**V2 solo software** (diseño sin macros: sin contador, con botón de reset, 1.183 LC, fmax 38,7 MHz).
+**V2 solo software** (diseño sin macros: sin contador, con botón de reset, 1.183 LC; fmax 38,7 MHz
+con la semilla 1 del script de variantes y 36,8 MHz con la de `make`, PASS a 25 MHz en ambos casos).
 
 - **Gana lo mismo que cualquier variante:** todas toman exactamente las mismas decisiones (IGUALES).
   El patrimonio depende solo del algoritmo.
-- **Ya cumple el deadline con margen:** el peor tick usa el 50 % de la ronda 3. La aceleración de D
-  (3,1×) no cambia ningún resultado de la competencia.
+- **Ya cumple el deadline con margen:** el peor tick usa el 29–32 % de la ronda 3, después de la
+  optimización por software (`mul_d2`). La aceleración de D (2,3× más) no cambia ningún resultado de
+  la competencia.
 - **Es la de menor riesgo en la placa:** no usa `RAM_NO_RW_CHECK` ni periféricos nuevos en el camino
   del dato, y deja 97 LC libres.
 

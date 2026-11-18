@@ -6,6 +6,7 @@
 |---|---|---|---|
 | `trade.s` (V2) = referencia, serie Meta completa | `make medir NOMBRE=v2_20000 NTICKS=20000` + `--compara` | 4/4 PASS, IGUALES en los 20.000 ticks | `docs/mediciones/v2_20000.log`, `v2_20000_compara.txt` |
 | `trade.s` (V2) bajo estrés (215 órdenes, W hasta 122.522) | `make medir NOMBRE=v2_estres SERIE=…estres…` | 4/4 PASS, IGUALES | `v2_estres_compara.txt` |
+| `trade_v2a.s` (primera versión de V2, sin `mul_d2`) | ídem, Meta 20.000 y estrés | 4/4 PASS, IGUALES en ambas | `v2a_20000_compara.txt`, `v2a_estres_compara.txt` |
 | `trade_mul.s` + multiplicador (D) | ídem con `DEFS=SOC_MUL` | 4/4 PASS, IGUALES | `mul_estres_compara.txt` |
 | V1 (respaldo), serie Meta completa | `make medir NOMBRE=sw_20000` cuando `trade.s` era V1 (archivos renombrados a `v1_20000_*`) | 4/4 PASS, IGUALES en los 20.000 ticks | `v1_20000.log`, `v1_20000_compara.txt` |
 | V1 + suma móvil (B), serie Meta completa | `DEFS=SOC_SMA` | 4/4 PASS, IGUALES en los 20.000 ticks | `sma_20000_compara.txt` |
