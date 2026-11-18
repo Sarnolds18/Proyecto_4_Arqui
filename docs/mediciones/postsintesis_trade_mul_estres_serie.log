@@ -1,0 +1,21 @@
+# post-sintesis de pochoco_ram con RAM_NO_RW_CHECK, programa sw/trade_mul.hex, serie docs/mediciones/estres_serie.csv, 500 ticks, ronda 3, macros: SOC_MUL
+# Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3); lineas 'emulate' en el log de yosys: 0 (0 = sin logica de emulacion)
+Patrimonio final:          17690
+Ordenes ejecutadas:        14
+Perdida maxima:            6145
+No operar:                 10000
+Comprar y mantener:        5907
+Peor caso precio->decision: 18 ciclos (disponibles: 2262)
+Detalle por tick en decisiones.csv
+PASS MISO sin valores X
+PASS el programa escribe DECISION
+PASS el programa lee todos los precios
+PASS la decision llega antes del siguiente tick
+Testbenchs aprobados: 4/4
+/tmp/tmp.2sSLyxqA8c/tb.sv:149: $finish called at 50004000000 (1ps)
+Serie: docs/mediciones/estres_serie.csv, 500 ticks, ronda 3 (2 precios en reset), estrategia: v2
+                       patrimonio  ordenes  comisiones  perdida max
+v2                          17690       14          70         6145
+no operar                   10000        0           0            0
+comprar y mantener           5907        1           5         9128
+IGUALES: los 500 ticks coinciden con /tmp/tmp.2sSLyxqA8c/run/decisiones.csv

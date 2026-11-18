@@ -1,0 +1,6 @@
+Serie: tb/practica_meta.csv, 2000 ticks, ronda 3 (2 precios en reset), estrategia: v1 (U = 3)
+                       patrimonio  ordenes  comisiones  perdida max
+v1                          11635       14          70          540
+no operar                   10000        0           0            0
+comprar y mantener          11375        1           5         1560
+IGUALES: los 2000 ticks coinciden con decisiones.csv

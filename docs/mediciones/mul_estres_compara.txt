@@ -1,0 +1,1 @@
+IGUALES: los 2000 ticks coinciden con decisiones.csv
