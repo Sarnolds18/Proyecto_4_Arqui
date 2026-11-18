@@ -19,8 +19,9 @@
 # Las ordenes nunca piden mas caja ni mas acciones de las que hay, asi que la
 # maestra no las recorta y la copia de caja/acciones es exacta.
 #
-# Sin mul/div/shift: 40p con sumas (32p + 8p) y los productos de variables
-# con la subrutina mul (suma y doble, un bit del multiplicador por vuelta).
+# Sin mul/div/shift: 40p con sumas (32p + 8p), los productos por D^2 = 24025
+# con una cadena fija de sumas (mul_d2) y los productos de dos variables con
+# la subrutina mul (suma y doble, un bit del multiplicador por vuelta).
 # No hay division: la exposicion se compara escalada (r^2 * W vs D^2 * V).
 # Los productos se comparan sin signo: no desbordan mientras W < ~170.000
 # (validado con la serie de estres, que llega a W = 122.522).
@@ -41,7 +42,7 @@
 #   x10 = mascara de mul
 #   x11 = qp = 40 * p
 #   x12 = temporal de mul
-#   x13 = multiplicando de mul (se destruye)
+#   x13 = multiplicando de mul / mul_d2 (se destruye)
 #   x14 = multiplicador de mul
 #   x15 = direccion de retorno de mul
 #
@@ -117,10 +118,8 @@ decide:
     # comprar si caja >= qp + 5 y r*r*W >= D^2 * (V + qp)
     addi x3, x11, 5
     blt  x5, x3, prueba_venta
-    lui  x13, 6                 # D^2 = 24025 = 24576 - 551
-    addi x13, x13, -551
-    add  x14, x9, x11           # V + qp
-    jal  x15, mul
+    add  x13, x9, x11           # D^2 * (V + qp)
+    jal  x15, mul_d2
     bltu x8, x3, prueba_venta
     addi x7, x0, 0x68           # COMPRAR | 40
     jal  x0, escribe
@@ -129,10 +128,8 @@ prueba_venta:
     # vender si acc >= 40 y r*r*W <= D^2 * (V - qp)
     addi x3, x0, 40
     blt  x6, x3, espera         # sin 40 acciones: MANTENER (ya escrito)
-    lui  x13, 6                 # D^2
-    addi x13, x13, -551
-    sub  x14, x9, x11           # V - qp (>= 0 porque acc >= 40)
-    jal  x15, mul
+    sub  x13, x9, x11           # D^2 * (V - qp), V - qp >= 0 porque acc >= 40
+    jal  x15, mul_d2
     bltu x3, x8, espera         # D^2 * (V - qp) < r*r*W: MANTENER
     addi x7, x0, 0xA8           # VENDER | 40
 
@@ -155,4 +152,33 @@ mul_s:
     add  x10, x10, x10          # mascara * 2
     bne  x10, x0, mul_l
 mul_fin:
+    jalr x0, 0(x15)
+
+# x3 = x13 * 24025 (D^2), sin bucle: 24025 = 2^14 + 2^12 + 2^11 + 2^10 + 2^8
+# + 2^7 + 2^6 + 2^4 + 2^3 + 2^0, una suma por bit en 1. Usa x12.
+mul_d2:
+    addi x3, x13, 0             # bit 0
+    add  x12, x13, x13          # 2x
+    add  x12, x12, x12          # 4x
+    add  x12, x12, x12          # 8x
+    add  x3, x3, x12            # bit 3
+    add  x12, x12, x12          # 16x
+    add  x3, x3, x12            # bit 4
+    add  x12, x12, x12          # 32x
+    add  x12, x12, x12          # 64x
+    add  x3, x3, x12            # bit 6
+    add  x12, x12, x12          # 128x
+    add  x3, x3, x12            # bit 7
+    add  x12, x12, x12          # 256x
+    add  x3, x3, x12            # bit 8
+    add  x12, x12, x12          # 512x
+    add  x12, x12, x12          # 1024x
+    add  x3, x3, x12            # bit 10
+    add  x12, x12, x12          # 2048x
+    add  x3, x3, x12            # bit 11
+    add  x12, x12, x12          # 4096x
+    add  x3, x3, x12            # bit 12
+    add  x12, x12, x12          # 8192x
+    add  x12, x12, x12          # 16384x
+    add  x3, x3, x12            # bit 14
     jalr x0, 0(x15)

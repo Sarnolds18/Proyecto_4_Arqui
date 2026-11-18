@@ -6,14 +6,78 @@ Reloj 25 MHz. Ventana por tick: `sim/sonda_p4.sv`. Presupuesto (ciclos) = (T - 9
 
 | Variante | Ticks | IC prom | IC peor | Ciclos prom | Ciclos peor | CPI prom | t prom (us) | t peor (us) | Peor / T ronda 3 | Ciclos hasta ultima DECISION (peor) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| v2_20000 | 19998 | 257.48 | 342 | 583.94 | 779 | 2.268 | 23.36 | 31.16 | 34.44 % | 757 |
-| v2_estres | 1998 | 321.13 | 499 | 727.16 | 1133 | 2.264 | 29.09 | 45.32 | 50.09 % | 1129 |
+| v2_20000 | 19998 | 227.34 | 292 | 509.40 | 653 | 2.241 | 20.38 | 26.12 | 28.87 % | 592 |
+| v2_estres | 1998 | 235.84 | 326 | 526.99 | 721 | 2.235 | 21.08 | 28.84 | 31.87 % | 716 |
+| v2a_20000 | 19998 | 257.48 | 342 | 583.94 | 779 | 2.268 | 23.36 | 31.16 | 34.44 % | 757 |
+| v2a_estres | 1998 | 321.13 | 499 | 727.16 | 1133 | 2.264 | 29.09 | 45.32 | 50.09 % | 1129 |
 | mul_estres | 1998 | 93.85 | 116 | 231.31 | 286 | 2.465 | 9.25 | 11.44 | 12.64 % | 282 |
 | v1_20000 | 19998 | 23.68 | 32 | 54.71 | 72 | 2.311 | 2.19 | 2.88 | 3.18 % | 64 |
 | sma_20000 | 19998 | 17.68 | 26 | 42.98 | 60 | 2.432 | 1.72 | 2.40 | 2.65 % | 52 |
 | shift | 1998 | 20.85 | 29 | 49.22 | 66 | 2.361 | 1.97 | 2.64 | 2.92 % | 58 |
 
 ## Perfil por region: v2_20000 (`sw/trade.s`)
+
+| Region (etiqueta) | Ciclos | % ciclos | Instrucciones | CPI |
+|---|---:|---:|---:|---:|
+| `espera` | 212403 | 2.1 % | 89931 | 2.36 |
+| `lee` | 139986 | 1.4 % | 59994 | 2.33 |
+| `cuenta` | 319992 | 3.1 % | 159996 | 2.00 |
+| `no_compro` | 79992 | 0.8 % | 39996 | 2.00 |
+| `nivel` | 199980 | 2.0 % | 99990 | 2.00 |
+| `r_ok` | 439956 | 4.3 % | 219978 | 2.00 |
+| `decide` | 148614 | 1.5 % | 74307 | 2.00 |
+| `prueba_venta` | 154924 | 1.5 % | 77462 | 2.00 |
+| `escribe` | 20 | 0.0 % | 10 | 2.00 |
+| `mul` | 239976 | 2.4 % | 119988 | 2.00 |
+| `mul_l` | 3206168 | 31.5 % | 1603084 | 2.00 |
+| `mul_s` | 2687166 | 26.4 % | 1343583 | 2.00 |
+| `mul_fin` | 119988 | 1.2 % | 59994 | 2.00 |
+| `mul_d2` | 1196250 | 11.7 % | 598125 | 2.00 |
+| burbujas tras saltos | 1041551 | 10.2 % | 0 | - |
+
+CPI por clase de instruccion en el kernel (fuera del bucle de espera):
+
+| Clase | Instrucciones | Ciclos | CPI |
+|---|---:|---:|---:|
+| alu | 2701173 | 5402346 | 2.00 |
+| branch | 1527486 | 3054972 | 2.00 |
+| jal | 83930 | 167860 | 2.00 |
+| load | 19998 | 59994 | 3.00 |
+| otra | 83919 | 167838 | 2.00 |
+| store | 40001 | 80002 | 2.00 |
+
+## Perfil por region: v2_estres (`sw/trade.s`)
+
+| Region (etiqueta) | Ciclos | % ciclos | Instrucciones | CPI |
+|---|---:|---:|---:|---:|
+| `espera` | 21150 | 2.0 % | 8974 | 2.36 |
+| `lee` | 13986 | 1.3 % | 5994 | 2.33 |
+| `cuenta` | 32832 | 3.1 % | 16416 | 2.00 |
+| `no_compro` | 8202 | 0.8 % | 4101 | 2.00 |
+| `nivel` | 20120 | 1.9 % | 10060 | 2.00 |
+| `r_ok` | 43956 | 4.2 % | 21978 | 2.00 |
+| `decide` | 17790 | 1.7 % | 8895 | 2.00 |
+| `prueba_venta` | 15688 | 1.5 % | 7844 | 2.00 |
+| `escribe` | 860 | 0.1 % | 430 | 2.00 |
+| `mul` | 23976 | 2.3 % | 11988 | 2.00 |
+| `mul_l` | 322562 | 30.6 % | 161281 | 2.00 |
+| `mul_s` | 270498 | 25.7 % | 135249 | 2.00 |
+| `mul_fin` | 11988 | 1.1 % | 5994 | 2.00 |
+| `mul_d2` | 144000 | 13.7 % | 72000 | 2.00 |
+| burbujas tras saltos | 105319 | 10.0 % | 0 | - |
+
+CPI por clase de instruccion en el kernel (fuera del bucle de espera):
+
+| Clase | Instrucciones | Ciclos | CPI |
+|---|---:|---:|---:|
+| alu | 283945 | 567890 | 2.00 |
+| branch | 153897 | 307794 | 2.00 |
+| jal | 9305 | 18610 | 2.00 |
+| load | 1998 | 5994 | 3.00 |
+| otra | 8874 | 17748 | 2.00 |
+| store | 4211 | 8422 | 2.00 |
+
+## Perfil por region: v2a_20000 (`sw/trade_v2a.s`)
 
 | Region (etiqueta) | Ciclos | % ciclos | Instrucciones | CPI |
 |---|---:|---:|---:|---:|
@@ -43,7 +107,7 @@ CPI por clase de instruccion en el kernel (fuera del bucle de espera):
 | otra | 83919 | 167838 | 2.00 |
 | store | 40001 | 80002 | 2.00 |
 
-## Perfil por region: v2_estres (`sw/trade.s`)
+## Perfil por region: v2a_estres (`sw/trade_v2a.s`)
 
 | Region (etiqueta) | Ciclos | % ciclos | Instrucciones | CPI |
 |---|---:|---:|---:|---:|
@@ -168,7 +232,8 @@ CPI por clase de instruccion en el kernel (fuera del bucle de espera):
 
 | Base -> variante | Region acelerada | Fraccion p | Speedup de la region s | Predicho 1/((1-p)+p/s) | Medido | Limite 1/(1-p) |
 |---|---|---:|---:|---:|---:|---:|
-| v2_estres -> mul_estres | mul+mul_l+mul_s+mul_fin | 0.759 | 4.81 | 2.506 | 3.144 | 4.145 |
+| v2_estres -> mul_estres | mul+mul_l+mul_s+mul_fin+mul_d2 | 0.734 | 3.37 | 2.068 | 2.278 | 3.762 |
+| v2a_estres -> v2_estres | mul+mul_l+mul_s+mul_fin | 0.759 | 1.43 | 1.293 | 1.380 | 4.145 |
 | v1_20000 -> sma_20000 | media | 0.311 | 3.40 | 1.281 | 1.273 | 1.451 |
 | v1_20000 -> shift | decide | 0.228 | 1.81 | 1.114 | 1.112 | 1.296 |
 
@@ -179,8 +244,10 @@ Operacion util (2), para el roofline: **instruccion de ALU** (OP, OP-IMM, LUI o 
 
 | Variante | LC | Precios/s (peor tick) | Ops ALU por tick | Bytes por tick | Intensidad (ops/B) | Ciclos kernel por tick | Ops ALU/s en el kernel |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| v2_20000 | - | 32.092 | 241.58 | 12.00 | 20.130 | 506.95 | 11.91 M |
-| v2_estres | - | 22.065 | 304.44 | 12.43 | 24.491 | 634.28 | 12.00 M |
+| v2_20000 | - | 38.285 | 211.45 | 12.00 | 17.620 | 446.70 | 11.83 M |
+| v2_estres | - | 34.674 | 219.14 | 12.43 | 17.629 | 463.69 | 11.81 M |
+| v2a_20000 | - | 32.092 | 241.58 | 12.00 | 20.130 | 506.95 | 11.91 M |
+| v2a_estres | - | 22.065 | 304.44 | 12.43 | 24.491 | 634.28 | 12.00 M |
 | mul_estres | - | 87.413 | 50.64 | 118.47 | 0.427 | 197.35 | 6.42 M |
 | v1_20000 | - | 347.222 | 14.15 | 20.07 | 0.705 | 40.36 | 8.77 M |
 | sma_20000 | - | 416.667 | 9.15 | 16.07 | 0.569 | 28.36 | 8.07 M |
