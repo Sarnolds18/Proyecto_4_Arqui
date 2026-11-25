@@ -24,10 +24,37 @@ por el reset de encendido (164 µs); `ref/trader.py -r` lo modela. En la placa n
 - **Botón de reset (SW1):** repite el reset de encendido. Así cada ronda parte con caja 10.000 y 0
   acciones, igual que la contabilidad de la maestra. Testbench: `sim/tb_reset_boton.v`.
 - El 7 segmentos muestra el último precio en hexadecimal (`64` = 100, `FF` = 255).
-- **Pendiente:** el SPI con la maestra real no se probó, porque el grupo no pudo ir a la prueba de
-  conexión. Todo lo que depende del protocolo está validado con el testbench del curso, que emula a la
-  maestra. `kit/CHECKLIST.md` tiene el orden de prueba (primero `echo.bin`) para el día de la
-  competencia.
+- **SPI con la maestra real: probado.** En las prácticas del 20/11 y el 25/11 la placa se conectó a
+  la maestra con los pines de `goboard.pcf` y el protocolo funcionó sin cambios (modo 0, MSB
+  primero, decisión del tick n−1 ejecutada al precio del tick n). Lo validado antes con el testbench
+  del curso se confirmó en hardware. El orden de prueba está en `kit/CHECKLIST.md`.
+- **El bitstream de la placa es el del repo.** El 25/11 se leyó la flash con `iceprog -r`
+  (`scripts/respaldo_placa.sh`) y se comparó con `make trade_top.bin` de `main`
+  (`scripts/compara_bin.sh`): son idénticos bit a bit. Si el ruteo cambiara con otra versión de las
+  herramientas, el script compara además el programa dentro de la BRAM.
+
+## Ronda de práctica con la maestra
+
+Serie de Apple (julio de 2022, unos 52 días intradía), 7 grupos con $10.000 cada uno. Los valores se
+tomaron de fotos y videos de la pantalla de la maestra, así que pueden tener errores menores.
+
+| Puesto | Grupo | Patrimonio final | Contra comprar y mantener |
+|---|---|---:|---:|
+| **1º** | **Nosotros (V2)** | **$15.610** | **+41,1 %** |
+| 2º | Fila 3 | $14.310 | +29,3 % |
+| 3º | Fila 4 | $13.783 | +24,5 % |
+| 4º | Fila 6 | $13.770 | +24,4 % |
+| 5º | Fila 5 | $11.275 | +1,9 % |
+| 6º–7º | Filas 2 y 7 | $10.000 | −9,7 % (no operaron) |
+| — | Comprar y mantener | $11.063 | — |
+
+El resultado se parece a lo que predijo el banco de 4.1:
+
+- **Subida (días 1–25, el precio casi se duplica):** V2 baja la exposición a medida que el precio
+  sube, así que captura solo parte de la subida. En el día 25 iba −20,5 % contra comprar y mantener,
+  aunque primero entre los grupos.
+- **Caída (días 25–52, casi hasta el nivel inicial):** V2 conserva lo que ganó en la subida y vuelve
+  a comprar en las bajadas. Termina primero, con 12 puntos de ventaja sobre el segundo.
 
 ## Reproducir todo
 

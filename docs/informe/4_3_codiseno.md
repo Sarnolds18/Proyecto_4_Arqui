@@ -147,6 +147,13 @@ con la semilla 1 del script de variantes y 36,8 MHz con la de `make`, PASS a 25 
 - **Es la de menor riesgo en la placa:** no usa `RAM_NO_RW_CHECK` ni periféricos nuevos en el camino
   del dato, y deja 97 LC libres.
 
+Que la variante final sea solo software es también un resultado del co-diseño, no la ausencia de
+uno. El profiling mostró que la multiplicación se llevaba el 75,9 % de los ciclos, y que la mitad de
+los productos eran por la constante D². El primer paso fue en software: `mul_d2` dio 1,38× sin costo
+de LUTs y dejó el peor tick en el 32 % del presupuesto de la ronda 3. El multiplicador D se
+implementó y se midió (2,3× más), pero con ese margen ya no cambia ninguna decisión: solo agrega
+lógica en el camino del dato y riesgo en la placa.
+
 D es la mejor alternativa en rendimiento y en LUTs (más rápida y con menos LC gracias a nrw), y sería
 la elegida si el algoritmo necesitara más multiplicaciones por tick. Por ejemplo, un ensamble de
 varias exposiciones, que con software no cabría en la ronda 3.
