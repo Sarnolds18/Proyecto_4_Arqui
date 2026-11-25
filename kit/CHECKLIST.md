@@ -1,5 +1,11 @@
 # Kit para la FPGA maestra (prueba de conexión y competencia)
 
+> **Competencia y defensa: viernes 27/11** (hora por confirmar). El SPI ya se probó con la maestra
+> en las prácticas del 20/11 y el 25/11, y funcionó. La placa ya tiene el `trade_top.bin` final:
+> el 25/11 se leyó la flash con `iceprog -r` y es idéntica bit a bit a `make trade_top.bin` de
+> `main` (`856601b`). **El viernes no hay que flashear nada.** Los pasos 1 a 3 de abajo son solo
+> por si algo falla.
+
 Dos bitstreams, los dos con el mismo SoC (`pochoco_soc`) y distinto programa en la RAM:
 
 | Bitstream | Programa | Qué hace | Para qué sirve |
@@ -28,15 +34,13 @@ la placa con `usbipd attach` (ver README, "Flashing from WSL").
 
 ## Llevar
 
-> ⚠️ **Lucas tiene que ir sí o sí**: su Go Board es la única del grupo.
+> ⚠️ **El grupo tiene una sola Go Board, y la tiene Santiago**: él tiene que ir sí o sí.
 
-- [ ] La Go Board de Lucas y el cable USB
+- [ ] La Go Board y el cable USB
 - [ ] 5 cables dupont: SCLK, MOSI, CS_n, MISO **y GND** (la tierra común es obligatoria)
-- [ ] El notebook de Lucas con `iceprog` probado el mar 17, y `echo.bin` y `trade_top.bin`
-      ya generados
-- [ ] Respaldo: el notebook de Santiago (también tiene Go Board). Con su toolchain los dos
-      bitstreams compilan (Yosys 0.33, nextpnr 0.6); para flashear desde WSL hace falta
-      `usbipd`.
+- [ ] Por si la placa pierde su programa: un computador con `iceprog` y `trade_top.bin` ya
+      generado desde `main`. El de Santiago compila con los paquetes de apt (Yosys 0.33,
+      nextpnr 0.6, icestorm 20230218) y flashea desde WSL con `usbipd` (probado el 25/11).
 - [ ] Este checklist
 
 ## Conexión (PMOD, según `goboard.pcf`)
@@ -92,7 +96,8 @@ Confirmar contra el conector de la maestra antes de enchufar. Las dos placas tra
 ## Preguntar
 
 - [x] Reset entre rondas: sí (confirmado). Lo hacemos con **SW1** (botón de reset, ver paso 4).
-- [ ] ¿Se puede usar que cada ronda está normalizada a 100–255? V2 se basa en eso. Respaldo si no:
-      `make clean && make TRADE_HEX=sw/trade_v1.hex trade_top.bin` (V1).
-- [ ] ¿La competencia del 24/11 usa el mismo conector y los mismos pines?
+- [x] ¿Se puede usar que cada ronda está normalizada a 100–255? Sí: el anuncio del 17/11 dice que
+      las series de la competencia se normalizan igual que `practica_meta.csv` (100–255).
+- [x] ¿La competencia usa el mismo conector y los mismos pines? En las prácticas del 20/11 y el
+      25/11 se usaron los de `goboard.pcf` y funcionó.
 - [x] 20.000 ticks por ronda (confirmado). ¿Las 3 rondas van seguidas?
