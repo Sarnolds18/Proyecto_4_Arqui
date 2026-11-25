@@ -28,3 +28,6 @@ sim/sim
 !docs/**/*.csv
 !docs/**/*.log
 sim/build/
+
+# Respaldos de la flash de la Go Board (iceprog -r): guardarlos tambien fuera del repo
+respaldos/
