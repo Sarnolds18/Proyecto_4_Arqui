@@ -1,0 +1,9 @@
+WARNING: rtl/pochoco_ram.v:43: $readmemh(sw/trade_v2r.hex): Not enough words in the file for the requested range [0:511].
+Reinicio: no hubo (pausa de 950000000 ns)
+Patrimonio final B: 10000
+PASS MISO sin valores X
+sim/tb_reinicio.sv:138: $finish called at 1160004000000 (1ps)
+Serie A: 1500 ticks, serie B: 600 ticks, modelo sin reinicio
+Patrimonio final B: tb 10000, referencia 10000
+IGUALES: los 2100 ticks coinciden con la referencia
+EXIT 0

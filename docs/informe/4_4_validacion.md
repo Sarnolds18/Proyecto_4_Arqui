@@ -13,6 +13,11 @@
 | V1 + shifter (C) | `DEFS=ESPINO_SHIFTER`, 2.000 ticks | 4/4 PASS, IGUALES | `shift_compara.txt` |
 | RAM con `RAM_NO_RW_CHECK` (post-síntesis) | `sim/postsintesis_ram.sh` | 4/4 PASS, IGUALES | `postsintesis_*.log` |
 | Módulos nuevos | `sim/tb_pochoco_mul.v`, `tb_pochoco_sma.v`, `tb_espino_alu_shift.v`, `tb_reset_boton.v` | PASS; cada tb falla con una mutación del RTL | README, sección de testbenches |
+| `trade_v2r.s` (V2 + reinicio automático) = referencia | `make tb_p4 PROG=sw/trade_v2r.hex`, Meta 20.000, estrés, rondas 1 y 2 | 4/4 PASS, IGUALES; mismas decisiones que `trade.s` | `v2r_20000.log`, `v2r_estres.log` |
+| Reinicio entre series sin SW1 | `sim/tb_reinicio.sv` + `ref/reinicio.py`: serie A, pausa sin SPI, serie B | v2r: pausa de 1,3 s → se reinicia a los 0,987 s y B es IGUAL a una placa nueva; pausa de 0,95 s → no se reinicia. `trade.s`: no se reinicia | `reinicio_*.log` |
+| SoC completo después de la síntesis | `sim/postsintesis_soc.sh` (netlist de yosys en lugar del RTL), serie de estrés | IGUALES con `trade.s` y con `trade_v2r.s` | `postsintesis_soc_*.log` |
+| Margen del SPI | `sim/barrido_spi.sh`: `echo.s` con SCLK de 1 a 8 MHz y CS_n→primer flanco de 40 a 1000 ns | IGUALES hasta 4 MHz con cualquier tiempo de CS_n; falla desde 5 MHz (el enunciado fija ≤ 1 MHz) | `spi_barrido.txt` |
+| Bitstreams | `scripts/compara_bin.sh` contra la flash de la placa | `trade.s`: idéntico bit a bit. `trade_v2r`: misma lógica y ruteo (`.asc` sin la BRAM idéntico), solo cambia el programa | — |
 
 Todas las simulaciones usan el testbench del curso **sin modificar** (`tb/tb_proyecto_4.sv`). El
 Makefile genera una copia que cambia solo el bloque de configuración (programa, serie, período y
@@ -32,6 +37,32 @@ por el reset de encendido (164 µs); `ref/trader.py -r` lo modela. En la placa n
   (`scripts/respaldo_placa.sh`) y se comparó con `make trade_top.bin` de `main`
   (`scripts/compara_bin.sh`): son idénticos bit a bit. Si el ruteo cambiara con otra versión de las
   herramientas, el script compara además el programa dentro de la BRAM.
+
+## Dos programas para la competencia: con y sin reinicio automático
+
+En la competencia cada equipo entrega su placa y el curso la conserva durante las 3 series, así que
+no podemos apretar SW1 entre una serie y otra. V2 lleva su propia copia de caja y acciones: si la
+maestra empieza una serie nueva (caja 10.000, 0 acciones) y la placa no se reinicia, la copia queda
+desincronizada. Con ventanas de datos reales de Apple, Meta, Netflix y Tesla, la suma de las 3 series
+cae de 47.148 a 39.700 en promedio (−15,8 %).
+
+Por eso hay dos programas con **el mismo algoritmo y el mismo hardware**:
+
+| Programa | Qué hace | Cuándo se usa |
+|---|---|---|
+| `sw/trade.s` | V2 (el que ganó la ronda de práctica) | Si la organización aprieta SW1 o desconecta la placa entre series |
+| `sw/trade_v2r.s` | V2 + reinicio automático: si pasa **1 s sin precio nuevo** (100 veces el período más lento, 10 ms), vuelve a caja 10.000 y 0 acciones y deja DECISION = MANTENER, igual que SW1 | Si no reinician la placa entre series, o no se sabe |
+
+El contador usa el registro de la máscara de `mul` (`x10`), que está libre mientras el programa
+espera un precio. Dentro de una serie las decisiones son idénticas a las de `trade.s` (mismas
+validaciones de arriba), y el peor tick sube de 653 a 657 ciclos. El costo es un reinicio falso si
+la maestra se pausa más de 1 s a mitad de una serie: la placa vuelve a caja 10.000 mientras la
+maestra conserva las acciones. Con datos reales eso cuesta −270 en promedio (en el 30 % de los casos,
+nada), contra −2.500 por serie si no hay reinicio. Además limpia cualquier pulso falso al conectar
+los cables antes de la primera serie.
+
+El programa se elige al entregar la placa, según lo que diga la organización. Los dos bitstreams
+se generan desde este repo (`kit/CHECKLIST.md`).
 
 ## Ronda de práctica con la maestra
 
@@ -60,8 +91,11 @@ El resultado se parece a lo que predijo el banco de 4.1:
 
 ```bash
 make trade_top.bin                                   # bitstream final (V2, 25 MHz)
+make clean && make TRADE_HEX=sw/trade_v2r.hex trade_top.bin   # V2 con reinicio automatico
 make tb_p4 NTICKS=20000                              # ~80 min; luego:
 python3 ref/trader.py -n 20000 --compara decisiones.csv
+bash sim/postsintesis_soc.sh sw/trade_v2r.hex 400 docs/mediciones/estres_serie.csv
+bash sim/barrido_spi.sh                              # margen de SCLK
 python3 ref/banco.py                                 # exploración (ver 4.1)
 bash docs/variantes/medir_variantes.sh               # tabla de LC/fmax (ver 4.3)
 python3 ref/mediciones.py v2_20000:sw/trade.s ...    # IC, ciclos, CPI (ver 4.2)

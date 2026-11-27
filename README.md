@@ -153,6 +153,9 @@ python3 ref/graficos.py                        # figuras de docs/informe/fig/ (n
 | `iverilog -g2012 -o /tmp/t $(yosys-config --datdir)/ice40/cells_sim.v rtl/*.v rtl/espino_core/*.v sim/tb_reset_boton.v && vvp /tmp/t` | botón de reset |
 | `iverilog -o /tmp/t sim/tb_pochoco_periph.v rtl/pochoco_periph.v rtl/debouncer.v && vvp /tmp/t` | periféricos (Proyecto 2) |
 | `bash sim/postsintesis_ram.sh sw/trade_mul.hex 500 SOC_MUL docs/mediciones/estres_serie.csv` | RAM con `RAM_NO_RW_CHECK` después de la síntesis |
+| `bash sim/postsintesis_soc.sh sw/trade_v2r.hex 400 docs/mediciones/estres_serie.csv` | SoC completo después de la síntesis (netlist de yosys) |
+| `iverilog -g2012 -DPROG_HEX=\"sw/trade_v2r.hex\" -s tb_reinicio -o /tmp/t $(yosys-config --datdir)/ice40/cells_sim.v rtl/*.v rtl/espino_core/*.v sim/tb_reinicio.sv && vvp -n /tmp/t +PAUSA_NS=1300000000 +NB=600 && python3 ref/reinicio.py reinicio.csv` | reinicio automático entre series (`trade_v2r.s`); con `--sin-reinicio` si la pausa es < 1 s o con `sw/trade.hex` |
+| `bash sim/barrido_spi.sh` | `echo.s` con SCLK de 1 a 8 MHz y distintos tiempos CS_n → primer flanco |
 
 `docs/mediciones/estres_serie.csv` (`python3 ref/series.py --estres …`) es una serie artificial que
 hace operar a V2 cientos de veces; sirve solo para validar `trade.s`.
@@ -164,7 +167,7 @@ diseño final.
 
 | Macro | Qué hace | Programa |
 |---|---|---|
-| (ninguna) | **diseño final**: SoC sin contador de ciclos, con botón de reset | `sw/trade.s` (V2) |
+| (ninguna) | **diseño final**: SoC sin contador de ciclos, con botón de reset | `sw/trade.s` (V2), o `sw/trade_v2r.s` (V2 + reinicio automático tras 1 s sin precios) con `make TRADE_HEX=sw/trade_v2r.hex trade_top.bin` |
 | `SOC_MUL` | D: multiplicador secuencial en `0x8002_0000` | `sw/trade_mul.s` (V2) |
 | `SOC_SMA` | B: suma móvil de 16 precios en el esclavo SPI | `sw/trade_sma.s` (V1) |
 | `ESPINO_SHIFTER` / `ESPINO_SHIFTER_FULL` | C: SLL, o SLL/SRL/SRA, en la ALU | `sw/trade_shift.s` (V1) |

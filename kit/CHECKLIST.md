@@ -1,17 +1,46 @@
 # Kit para la FPGA maestra (prueba de conexión y competencia)
 
-> **Competencia y defensa: viernes 27/11** (hora por confirmar). El SPI ya se probó con la maestra
-> en las prácticas del 20/11 y el 25/11, y funcionó. La placa ya tiene el `trade_top.bin` final:
-> el 25/11 se leyó la flash con `iceprog -r` y es idéntica bit a bit a `make trade_top.bin` de
-> `main` (`856601b`). **El viernes no hay que flashear nada.** Los pasos 1 a 3 de abajo son solo
-> por si algo falla.
+> **Competencia: viernes 27/11, 16:00.** El SPI ya se probó con la maestra en las prácticas del
+> 20/11 y el 25/11, y funcionó. La placa tiene `trade.s` (el que ganó la práctica): el 25/11 se leyó
+> la flash con `iceprog -r` y es idéntica bit a bit a `make trade_top.bin` de `main`.
+> **Antes de entregar la placa hay que preguntar si reinician las placas entre series** y cargar el
+> programa que corresponda (ver "Mañana: qué preguntar y qué cargar"). Los pasos 1 a 3 de "Orden de
+> la prueba" son solo por si algo falla.
+
+## Mañana: qué preguntar y qué cargar
+
+Preguntar a los ayudantes, antes de entregar la placa:
+
+1. ¿Aprietan SW1 o desconectan la placa entre una serie y la siguiente?
+2. ¿Van a pausar la maestra (BTNC) a mitad de alguna serie? ¿Cuánto rato?
+
+| Respuesta | Qué cargar |
+|---|---|
+| Sí reinician entre series | `trade.s`: **no hay que flashear nada**, ya está en la placa |
+| No reinician, o no saben | `trade_v2r`: se reinicia sola después de 1 s sin precios |
+| No reinician y pausan más de 1 s a mitad de serie | Igual `trade_v2r`: un reinicio falso cuesta ~−270 en promedio y no reiniciar ~−2.500 por serie |
+
+Tener los dos `.bin` generados de antemano (no compilar allá), con el `iceprog` probado en el mismo
+computador:
+
+```bash
+make clean && make trade_top.bin && cp trade_top.bin trade.bin                              # trade.s
+make clean && make TRADE_HEX=sw/trade_v2r.hex trade_top.bin && cp trade_top.bin trade_v2r.bin  # v2r
+sha256sum trade.bin trade_v2r.bin   # trade.bin = 025901f5... (el de la placa), trade_v2r.bin = b0c38111...
+bash scripts/respaldo_placa.sh      # siempre antes de flashear
+iceprog trade_v2r.bin               # o: iceprog trade.bin, para volver al de la practica
+```
+
+Con `trade_v2r` la placa se reinicia sola cada 1 s mientras no le llegan precios. Eso es normal y no
+se ve (el 7-seg sigue con el último precio). Después de flashear, SW1 sigue funcionando igual.
 
 Dos bitstreams, los dos con el mismo SoC (`pochoco_soc`) y distinto programa en la RAM:
 
 | Bitstream | Programa | Qué hace | Para qué sirve |
 |---|---|---|---|
 | `echo.bin` | `sw/echo.s` | Por cada precio: `DECISION = precio` y lo muestra en el 7-seg | Revisar cables, modo SPI y orden de bits |
-| `trade_top.bin` | `sw/trade.s` (**V2, final**) | Exposición por nivel de precio: compra de a 40 acciones cuando el precio baja, vende de a 40 cuando sube | La competencia |
+| `trade_top.bin` | `sw/trade.s` (**V2, final**) | Exposición por nivel de precio: compra de a 40 acciones cuando el precio baja, vende de a 40 cuando sube | La competencia, si reinician la placa entre series |
+| `trade_top.bin` con `TRADE_HEX=sw/trade_v2r.hex` | `sw/trade_v2r.s` | V2 + reinicio automático tras 1 s sin precios | La competencia, si **no** reinician la placa entre series |
 
 Validación en simulación (testbench del curso, ronda 3): `trade.s` (V2) da **4/4 PASS** e
 **IGUALES** con `ref/trader.py` en los 20.000 ticks de la serie Meta (`docs/mediciones/v2_20000.log`);
@@ -82,7 +111,7 @@ Confirmar contra el conector de la maestra antes de enchufar. Las dos placas tra
      principio.
    - El 7-seg muestra el precio en hexadecimal.
 4. **Antes de cada ronda, y cada vez que la maestra reinicia la serie (su botón BTNR): apretar
-   SW1 (reset).** No tocar la placa durante una ronda: un reset a mitad de ronda desincroniza la
+   SW1 (reset)** (con `trade_v2r` no hace falta si pasa más de 1 s entre series). No tocar la placa durante una ronda: un reset a mitad de ronda desincroniza la
    cuenta del programa con la de la maestra. SW1 reinicia el programa (caja 10.000, 0 acciones)
    en 164 µs, igual que la maestra al empezar la ronda. No hace falta volver a flashear. Si la
    maestra solo pausa (BTNC), no hay que hacer nada.
@@ -95,7 +124,9 @@ Confirmar contra el conector de la maestra antes de enchufar. Las dos placas tra
 
 ## Preguntar
 
-- [x] Reset entre rondas: sí (confirmado). Lo hacemos con **SW1** (botón de reset, ver paso 4).
+- [x] Reset entre rondas en las prácticas: sí, lo hacíamos nosotros con **SW1** (paso 4).
+- [ ] **Competencia: ¿reinician ellos las placas entre series?** Preguntado en el Foro el 25/11,
+      sin respuesta. Preguntar en persona (ver "Mañana: qué preguntar y qué cargar").
 - [x] ¿Se puede usar que cada ronda está normalizada a 100–255? Sí: el anuncio del 17/11 dice que
       las series de la competencia se normalizan igual que `practica_meta.csv` (100–255).
 - [x] ¿La competencia usa el mismo conector y los mismos pines? En las prácticas del 20/11 y el

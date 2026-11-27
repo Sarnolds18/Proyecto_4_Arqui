@@ -1,0 +1,20 @@
+# post-sintesis del SoC: sw/trade.hex, 400 ticks de docs/mediciones/estres_serie.csv
+Patrimonio final:          22590
+Ordenes ejecutadas:        10
+Perdida maxima:            4370
+No operar:                 10000
+Comprar y mantener:        14419
+Peor caso precio->decision: 0 ciclos (disponibles: 2262)
+Detalle por tick en decisiones.csv
+PASS MISO sin valores X
+FAIL el programa escribe DECISION
+PASS el programa lee todos los precios
+PASS la decision llega antes del siguiente tick
+Testbenchs aprobados: 3/4
+/tmp/tmp.YzH0Uz0CZb/tb.sv:137: $finish called at 40004000000 (1ps)
+Serie: docs/mediciones/estres_serie.csv, 400 ticks, ronda 3 (2 precios en reset), estrategia: v2
+                       patrimonio  ordenes  comisiones  perdida max
+v2                          22590       10          50         4370
+no operar                   10000        0           0            0
+comprar y mantener          14419        1           5         9128
+IGUALES: los 400 ticks coinciden con decisiones.csv
