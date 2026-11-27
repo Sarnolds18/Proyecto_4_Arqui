@@ -1,0 +1,14 @@
+WARNING: ./rtl/pochoco_ram.v:43: $readmemh(sw/trade_v2r.hex): Not enough words in the file for the requested range [0:511].
+Patrimonio final:          122522
+Ordenes ejecutadas:        215
+Perdida maxima:            32935
+No operar:                 10000
+Comprar y mantener:        13971
+Peor caso precio->decision: 23 ciclos (disponibles: 2262)
+Detalle por tick en decisiones.csv
+PASS MISO sin valores X
+PASS el programa escribe DECISION
+PASS el programa lee todos los precios
+PASS la decision llega antes del siguiente tick
+Testbenchs aprobados: 4/4
+sim/build/tb_proyecto_4.sv:149: $finish called at 200004000000 (1ps)
