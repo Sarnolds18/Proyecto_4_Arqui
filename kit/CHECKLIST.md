@@ -67,9 +67,10 @@ la placa con `usbipd attach` (ver README, "Flashing from WSL").
 
 - [ ] La Go Board y el cable USB
 - [ ] 5 cables dupont: SCLK, MOSI, CS_n, MISO **y GND** (la tierra común es obligatoria)
-- [ ] Por si la placa pierde su programa: un computador con `iceprog` y `trade_top.bin` ya
-      generado desde `main`. El de Santiago compila con los paquetes de apt (Yosys 0.33,
-      nextpnr 0.6, icestorm 20230218) y flashea desde WSL con `usbipd` (probado el 25/11).
+- [ ] Un computador con `iceprog` probado y los dos `.bin` ya generados desde `main`:
+      `trade.bin` y `trade_v2r.bin` (ver "Mañana: qué preguntar y qué cargar"). El de Santiago
+      compila con los paquetes de apt (Yosys 0.33, nextpnr 0.6, icestorm 20230218) y flashea desde
+      WSL con `usbipd` (probado el 25/11).
 - [ ] Este checklist
 
 ## Conexión (PMOD, según `goboard.pcf`)
@@ -99,6 +100,8 @@ Confirmar contra el conector de la maestra antes de enchufar. Las dos placas tra
    - **Si sale bien salvo el bit 7** (precios ≥ 128 llegan como precio − 128): la maestra da
      el primer flanco de SCLK muy pronto. El esclavo carga el bit 7 en MISO ~3 ciclos
      (~120 ns) después de que baja CS_n. Preguntar el tiempo entre CS_n y el primer flanco.
+     En simulación (`sim/barrido_spi.sh`) funciona con 40 ns entre CS_n y el primer flanco y
+     SCLK de hasta 4 MHz, así que es muy poco probable.
    - Con echo, la maestra va a ejecutar compras y ventas "al azar" (los bits [7:6] del precio).
      Es esperado. Con precios de 100 a 255 (serie Meta): de 100 a 127 compra, de 128 a 191
      vende y de 192 a 255 mantiene (bits `11`).

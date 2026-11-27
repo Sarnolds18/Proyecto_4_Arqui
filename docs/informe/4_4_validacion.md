@@ -44,7 +44,10 @@ En la competencia cada equipo entrega su placa y el curso la conserva durante la
 no podemos apretar SW1 entre una serie y otra. V2 lleva su propia copia de caja y acciones: si la
 maestra empieza una serie nueva (caja 10.000, 0 acciones) y la placa no se reinicia, la copia queda
 desincronizada. Con ventanas de datos reales de Apple, Meta, Netflix y Tesla, la suma de las 3 series
-cae de 47.148 a 39.700 en promedio (−15,8 %).
+cae de 47.148 a 39.700 en promedio (−15,8 %). Ese análisis se hizo el 25/11, después de la entrega,
+con barras de 1 minuto de 2022–2024 (dataset `deerfieldgreen/stk-intraday-data-1min` de Hugging Face,
+290 ventanas de 20.000 ticks normalizadas a 100–255 como el curso) y la clase `V2` de
+`ref/trader.py`; los scripts de ese análisis no quedaron en el repo.
 
 Por eso hay dos programas con **el mismo algoritmo y el mismo hardware**:
 
